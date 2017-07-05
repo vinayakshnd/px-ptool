@@ -1,0 +1,5 @@
+.idea/*
+*.json
+*/terraform.tfstate*
+*/terraform.tfvars
+azure/tfshow.yaml

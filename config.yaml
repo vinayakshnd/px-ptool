@@ -1,0 +1,63 @@
+digitalocean:
+  do_token: "YOUR_DO_TOKEN"
+
+  #
+  # Location of public and private key files
+  #
+  private_key_file: "ssh/id_rsa"
+  public_key_file: "ssh/id_rsa.pub"
+  #
+  # Region to create droplets on
+  #
+  do-region: "sfo2"
+  #
+  # Image of the droplets
+  #
+  do-image: "centos-7-x64"
+  px_node_count: 2
+  px_disk_count: 2
+  #
+  # Unique identifier for volumes and droplets
+  #
+  user_prefix: "johndoe"
+  #
+  # Size of droplet to be created. Default 2gb
+  #
+    #px-node-size: "2gb"
+
+  #
+  # Size of volume in GB
+  #
+    #px-disk-size: 10
+
+gcp:
+  region: "us-central1"
+  region_zone: "us-central1-a"
+  project: "omni-163105"
+  image: "ubuntu-os-cloud/ubuntu-1604-xenial-v20170330"
+  credentials_file_path: "credentials/terraform.json"
+  public_key_path: "credentials/id_rsa.pub"
+  private_key_path: "credentials/id_rsa"
+  machine_type: "n1-standard-1"
+  user_prefix: "omaryo"
+  px-disk-size: 10
+  px_node_count: 2
+  px_disk_count: 2
+  
+azure:
+  user_prefix: "bunk"
+  vm_count: 3
+  disk_count: 2
+  disk_size: 10
+  location: "Central US"
+  azure_subscription_id: "YOUR_AZURE_SUBSCRIPTION_ID"
+  azure_client_id: "YOUR_AZURE_CLIENT_ID"
+  azure_client_secret: "YOUR_AZURE_CLIENT_SECRET"
+  azure_tenant_id: "YOUR_AZURE_TENANT_ID"
+  azure_vm_size: "Standard_A1_v2"
+  vm_image_publisher: "Canonical"
+  vm_image_offer: "UbuntuServer"
+  vm_image_sku: "14.04.2-LTS"
+  vm_image_version: "latest"
+  vm_admin_user: "username"
+  vm_admin_password: "s3cretP@s$"
