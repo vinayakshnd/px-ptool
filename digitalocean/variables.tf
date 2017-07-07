@@ -10,17 +10,17 @@ variable "private_key_file" {
   description = "Location of the private key file"
 }
 
-variable "do-region" {
+variable "px_region" {
   default = "sfo2"
   description = "Digital Ocean region to create droplets"
 }
 
-variable "do-image"{
+variable "px_image"{
   default = "centos-7-x64"
   description = "Image to be used for all droplets"
 }
 
-variable "px-node-size"{
+variable "px_vm_size"{
   default = "2gb"
   description = "Droplet size"
 }
@@ -35,7 +35,7 @@ variable "px_disk_count" {
   description = "Number of disks per node"
 }
 
-variable "px-disk-size" {
+variable "px_disk_size" {
   default = 10
   description = "Size of volumes to be created"
 }

@@ -3,3 +3,9 @@
 */terraform.tfstate*
 */terraform.tfvars
 azure/tfshow.yaml
+deleteme.sh
+digitalocean/ssh/*.ppk
+digitalocean/ssh/*.pub
+gcp/credentials/*.ppk
+gcp/credentials/*.pub
+

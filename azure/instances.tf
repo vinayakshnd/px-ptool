@@ -2,7 +2,7 @@
 resource "azurerm_storage_account" "astgacc" {
   name                = "stgacc${var.user_prefix}"
   resource_group_name = "${azurerm_resource_group.rg.name}"
-  location            = "${var.location}"
+  location            = "${var.px_region}"
   account_type        = "Standard_LRS"
 
   tags {
@@ -19,11 +19,11 @@ resource "azurerm_storage_container" "astgctnr" {
 
 resource "azurerm_virtual_machine" "avm" {
   name                  = "px-azure-vm-${var.user_prefix}-${count.index}"
-  count                 = "${var.vm_count}"
-  location              = "${var.location}"
+  count                 = "${var.px_node_count}"
+  location              = "${var.px_region}"
   resource_group_name   = "${azurerm_resource_group.rg.name}"
   network_interface_ids = ["${element(azurerm_network_interface.anetint.*.id, count.index)}"]
-  vm_size = "${var.azure_vm_size}"
+  vm_size = "${var.px_vm_size}"
 
   storage_image_reference {
     publisher = "${var.vm_image_publisher}"
@@ -56,7 +56,7 @@ resource "azurerm_virtual_machine" "avm" {
   storage_data_disk {
     name          = "datadisk${var.user_prefix}${count.index + 1}1"
     vhd_uri       = "${azurerm_storage_account.astgacc.primary_blob_endpoint}${azurerm_storage_container.astgctnr.name}/datadisk${var.user_prefix}${count.index + 1}1.vhd"
-    disk_size_gb  = "${var.disk_size}"
+    disk_size_gb  = "${var.px_disk_size}"
     create_option = "Empty"
     lun           = "0"
   }
@@ -64,7 +64,7 @@ resource "azurerm_virtual_machine" "avm" {
   storage_data_disk {
     name          = "datadisk${var.user_prefix}${count.index + 1}2"
     vhd_uri       = "${azurerm_storage_account.astgacc.primary_blob_endpoint}${azurerm_storage_container.astgctnr.name}/datadisk${var.user_prefix}${count.index + 1}2.vhd"
-    disk_size_gb  = "${var.disk_size}"
+    disk_size_gb  = "${var.px_disk_size}"
     create_option = "Empty"
     lun           = "1"
   }

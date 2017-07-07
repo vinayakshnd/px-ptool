@@ -1,11 +1,11 @@
 resource "google_compute_instance" "px-gcp-node" {
   count = "${var.px_node_count}"
   name = "px-gcp-node-${var.user_prefix}-${count.index + 1}"
-  machine_type = "${var.machine_type}" 
-  zone         = "${var.region_zone}"
+  machine_type = "${var.px_vm_size}"
+  zone         = "${var.px_region_zone}"
   tags         = ["px-dev"]
   disk {
-    image = "${var.image}" // the operative system (and Linux flavour) that your machine will run
+    image = "${var.px_image}" // the operative system (and Linux flavour) that your machine will run
     size  = 15
   }
   network_interface {

@@ -5,14 +5,32 @@ import json
 import yaml
 import time
 
-with open('config.yaml', mode='r') as admincfg:
-    cfg = yaml.load(admincfg)
+#with open('config.yaml', mode='r') as admincfg:
+#    cfg = yaml.load(admincfg)
 
 action = sys.argv[1]
-service_key = cfg['gcp']['credentials_file_path']
-project = cfg['gcp']['project']
-zone = cfg['gcp']['region_zone']
-user_prefix = cfg['gcp']['user_prefix']
+
+with open('gcp/terraform.tfvars', mode='r') as f:
+    cfg = f.readlines()
+
+service_key = ''
+project = ''
+zone = ''
+user_prefix = ''
+private_key = ''
+
+for l in cfg:
+    if l.startswith('credentials_file_path'):
+        service_key = l.split('=')[1].strip().replace('"','')
+    if l.startswith('project'):
+        project = l.split('=')[1].strip().replace('"','')
+    if l.startswith('px_region_zone'):
+        zone = l.split('=')[1].strip().replace('"','')
+    if l.startswith('user_prefix'):
+        user_prefix = l.split('=')[1].strip().replace('"','')
+    if l.startswith('private_key_path'):
+        private_key = l.split('=')[1].strip().replace('"','')
+
 credentials = GoogleCredentials.from_stream('gcp/' + service_key)
 compute = build('compute', 'v1', credentials=credentials)
 
@@ -29,7 +47,7 @@ for i in result['items']:
     if action == 'attach':
         inst_details = {"User": "root",
                            "PublicIpAddress": i['networkInterfaces'][0]['accessConfigs'][0]['natIP'],
-                           "Passwd": "use-private-key",
+                           "Passwd": private_key,
                            "Port": 22}
         json_out.append(inst_details)
         with open('gcp_output.json', mode='w') as f:

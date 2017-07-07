@@ -1,7 +1,7 @@
 resource "azurerm_virtual_network" "avn" {
   name                = "virtual-net-${var.user_prefix}"
   address_space       = ["10.0.0.0/16"]
-  location            = "${var.location}"
+  location            = "${var.px_region}"
   resource_group_name = "${azurerm_resource_group.rg.name}"
 }
 
@@ -14,9 +14,9 @@ resource "azurerm_subnet" "asubnet" {
 
 
 resource "azurerm_public_ip" "apubip" {
-  count                        = "${var.vm_count}"
+  count                        = "${var.px_node_count}"
   name                         = "px-azure-${var.user_prefix}-pub-ip-${count.index}"
-  location                     = "${var.location}"
+  location                     = "${var.px_region}"
   resource_group_name          = "${azurerm_resource_group.rg.name}"
   public_ip_address_allocation = "dynamic"
 }
@@ -24,8 +24,8 @@ resource "azurerm_public_ip" "apubip" {
 
 resource "azurerm_network_interface" "anetint" {
   name                = "net-intf-${var.user_prefix}-${count.index}"
-  count               = "${var.vm_count}"
-  location            = "${var.location}"
+  count               = "${var.px_node_count}"
+  location            = "${var.px_region}"
   resource_group_name = "${azurerm_resource_group.rg.name}"
 
   ip_configuration {

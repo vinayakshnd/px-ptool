@@ -2,7 +2,7 @@
 resource "azurerm_storage_account" "astgacc" {
   name                = "stgacc${var.user_prefix}"
   resource_group_name = "${azurerm_resource_group.rg.name}"
-  location            = "${var.location}"
+  location            = "${var.px_region}"
   account_type        = "Standard_LRS"
 
   tags {
@@ -19,11 +19,11 @@ resource "azurerm_storage_container" "astgctnr" {
 
 resource "azurerm_virtual_machine" "avm" {
   name                  = "px-azure-vm-${var.user_prefix}-${count.index}"
-  count                 = "${var.vm_count}"
-  location              = "${var.location}"
+  count                 = "${var.px_node_count}"
+  location              = "${var.px_region}"
   resource_group_name   = "${azurerm_resource_group.rg.name}"
   network_interface_ids = ["${element(azurerm_network_interface.anetint.*.id, count.index)}"]
-  vm_size = "${var.azure_vm_size}"
+  vm_size = "${var.px_vm_size}"
 
   storage_image_reference {
     publisher = "${var.vm_image_publisher}"

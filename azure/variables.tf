@@ -1,4 +1,4 @@
-variable "location" {
+variable "px_region" {
   default = "West Europe"
 }
 
@@ -6,17 +6,17 @@ variable "user_prefix" {
   description = "Unique user prefix"
 }
 
-variable "vm_count" {
+variable "px_node_count" {
   default = 2
   description = "Number of VMs to create"
 }
 
-variable "disk_count" {
+variable "px_disk_count" {
   default = 1
   description = "Number of disks to add to each VM"
 }
 
-variable "disk_size" {
+variable "px_disk_size" {
   default = 10
   description = "Size of mounted disks in GB"
 }
@@ -38,7 +38,7 @@ variable "azure_tenant_id" {
   description = "Azure tenant id"
 }
 
-variable "azure_vm_size" {
+variable "px_vm_size" {
   description = "Size of Azure VM"
   default = "Standard_A0"
 }
