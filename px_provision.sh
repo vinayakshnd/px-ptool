@@ -208,6 +208,13 @@ destroy(){
 
 check_tf;
 scriptLoc=$PWD;
+
+# If no agruments passed to the script
+if [ $# -eq 0 ] || [ -z "$1" ]
+  then
+    show_usage
+fi
+
 action=$1;
 shift;
 if [[ "$action" != "apply" && "$action" != "destroy" && "$action" != "reset" ]]; then
