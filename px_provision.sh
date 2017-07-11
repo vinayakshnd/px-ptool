@@ -8,9 +8,8 @@ show_usage() {
 
 echo "Usage : $0 [apply|destroy|reset] [gcp|azure|digitalocean] [additional flags]";
 echo "Additional Flags:";
-echo "--auth        : Access token in case of digitalocean,| delimited string with project name and path to service account json file for gcp and | delimited string with AZURE_SUBSCRIPTION_ID,AZURE_CLIENT_ID,AZURE_CLIENT_SECRET,AZURE_TENANT_ID for azure";
 echo "--vm_creds    : | delimited string with public and private key for gcp and digitalocean, username and password for azure";
-echo "--region      : Region in which the VMs and disks should be created";
+echo "--region      : region in which the VMs and disks should be created";
 echo "--image       : Single value in case of gcp and digitalocean, Delimited string providing publisher, offer, sku and version in case of Azure";
 echo "--size        : Size of VMs to be created";
 echo "--nodes       : Number of VMs to be created";
@@ -43,27 +42,6 @@ fi
 
 }
 
-validate_params(){
-
-    paramList=( auth vm_creds region image size nodes disks disk_size user_prefix )
-    missingParams=()
-    for param in "${paramList[@]}"
-    do
-        : 
-        if [ -z ${!param} ]
-        then
-            missingParams+=("$param")
-        fi       
-    done
-
-    if [ ${#missingParams[@]} -ne 0 ]
-    then
-        echo "ERROR: Bellow additional flags are missing:"
-        (IFS=,; echo "${missingParams[*]}");
-        show_usage
-    fi
-}
-
 split_params() {
 #
 # Create cloud specific variables
@@ -76,8 +54,8 @@ fi
 
 if [[ "${cloud}" == "gcp" ]]; then
 
-    gcp_project=$(echo $auth | cut -d "|" -f1);
-    gcp_sa_json=$(echo $auth | cut -d "|" -f2);
+    #gcp_project=$(echo $auth | cut -d "|" -f1);
+    #gcp_sa_json=$(echo $auth | cut -d "|" -f2);
     gcp_region=$(echo $region | cut -d "|" -f1);
     gcp_region_zone=$(echo $region | cut -d "|" -f2);
 fi
@@ -104,8 +82,8 @@ split_params;
 cd $scriptLoc;
 if [[ "${cloud}" == "digitalocean" ]]; then
 
-cat <<EOF > digitalocean/terraform.tfvars
-do_token = "${auth}"
+cat <<EOF > output/digitalocean_${user_prefix}_terraform.tfvars
+do_token = "${TF_VAR_do_token}"
 public_key_file = "${vm_pub_key}"
 private_key_file = "${vm_pri_key}"
 px_region = "${region}"
@@ -120,9 +98,10 @@ EOF
 fi
 
 if [[ "${cloud}" == "gcp" ]]; then
-cat <<EOF > gcp/terraform.tfvars
-project = "${gcp_project}"
-credentials_file_path = "${gcp_sa_json}"
+echo "${GCP_SA_JSON}" > gcp/credentials/terraform.json
+cat <<EOF > output/gcp_${user_prefix}_terraform.tfvars
+project = "${GCP_PROJECT}"
+credentials_file_path = "credentials/terraform.json"
 px_region = "${gcp_region}"
 px_region_zone = "${gcp_region_zone}"
 public_key_path = "${vm_pub_key}"
@@ -139,11 +118,11 @@ fi
 
 if [[ "${cloud}" == "azure" ]]; then
 
-cat <<EOF > azure/terraform.tfvars
-azure_subscription_id = "${azure_sub_id}"
-azure_client_id = "${azure_client_id}"
-azure_client_secret = "${azure_client_secret}"
-azure_tenant_id = "${azure_tenant_id}"
+cat <<EOF > output/azure_${user_prefix}_terraform.tfvars
+azure_subscription_id = "${TF_VAR_azure_subscription_id}"
+azure_client_id = "${TF_VAR_azure_client_id}"
+azure_client_secret = "${TF_VAR_azure_client_secret}"
+azure_tenant_id = "${TF_VAR_azure_tenant_id}"
 px_region = "${region}"
 vm_image_publisher = "${azure_image_pub}"
 vm_image_offer = "${azure_image_offer}"
@@ -188,18 +167,20 @@ echo "}" >> ${inst_file}
 
 }
 
-
 destroy(){
 
     cd $scriptLoc;
+    echo "${GCP_SA_JSON}" > gcp/credentials/terraform.json
+
+
     if [[ "${cloud}" == "digitalocean" ]]; then
-        python digitalocean/scripts/do_api_action.py detach
+        python digitalocean/scripts/do_api_action.py detach ${user_prefix};
     fi
     if [[ "${cloud}" == "gcp" ]]; then
-         python gcp/scripts/gcp_api_action.py detach;
+         python gcp/scripts/gcp_api_action.py detach ${user_prefix};
     fi
-     cd $cloud;
-     terraform destroy -force;
+    cd $cloud;
+    terraform destroy -force -var-file="${scriptLoc}/output/${cloud}_${user_prefix}_terraform.tfvars" -state="${scriptLoc}/output/${cloud}_${user_prefix}.tfstate";
 }
 
 #
@@ -208,13 +189,6 @@ destroy(){
 
 check_tf;
 scriptLoc=$PWD;
-
-# If no agruments passed to the script
-if [ $# -eq 0 ] || [ -z "$1" ]
-  then
-    show_usage
-fi
-
 action=$1;
 shift;
 if [[ "$action" != "apply" && "$action" != "destroy" && "$action" != "reset" ]]; then
@@ -232,9 +206,6 @@ if [[ $supported -ne 0 ]]; then
     show_usage
 fi
 if [[ "$action" == "apply" || "$action" == "reset" ]]; then
-    if [[ "$action" == "reset" ]]; then
-        destroy;
-    fi
 
     while [ "$1" != "" ];
     do
@@ -280,30 +251,33 @@ if [[ "$action" == "apply" || "$action" == "reset" ]]; then
                 show_usage;;
         esac
     done
-    validate_params
+    if [[ "$action" == "reset" ]]; then
+        destroy;
+    fi
+
     gen_tfvars;
     if [[ "${cloud}" == "azure" ]]; then
-        disks=$(grep "^px_disk_count" ${cloud}/terraform.tfvars | cut -d"=" -f2 | tr -cd '[:alnum:]')
+        disks=$(grep "^px_disk_count" output/${cloud}_${user_prefix}_terraform.tfvars | cut -d"=" -f2 | tr -cd '[:alnum:]')
         add_azure_disks $disks
     fi
     cd $cloud;
-    terraform apply;
+    terraform apply -var-file="${scriptLoc}/output/${cloud}_${user_prefix}_terraform.tfvars" -state="${scriptLoc}/output/${cloud}_${user_prefix}.tfstate";
     cd $scriptLoc;
     #
     # Trigger Post actions
     #
     if [[ "${cloud}" == "digitalocean" ]]; then
-        python digitalocean/scripts/do_api_action.py attach;
+        python digitalocean/scripts/do_api_action.py attach ${user_prefix};
         echo "=======================================================================";
-        echo "   The JSON output file is digitalocean_output.json";
+        echo "   The JSON output file is digitalocean_${user_prefix}_output.json";
         echo "=======================================================================";
 
     fi
 
     if [[ "${cloud}" == "gcp" ]]; then
-        python gcp/scripts/gcp_api_action.py attach;
+        python gcp/scripts/gcp_api_action.py attach ${user_prefix};
         echo "=======================================================================";
-        echo "   The JSON output file is gcp_output.json";
+        echo "   The JSON output file is gcp_${user_prefix}_output.json";
         echo "=======================================================================";
 
     fi
@@ -315,12 +289,12 @@ if [[ "$action" == "apply" || "$action" == "reset" ]]; then
 #
     if [[ "${cloud}" == "azure" ]]; then
         cd azure;
-        terraform apply > /dev/null 2>&1
-        terraform show -no-color | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" | sed "s/ = /: /g" > tfshow.yaml
+        terraform apply -var-file="${scriptLoc}/output/${cloud}_${user_prefix}_terraform.tfvars" -state="${scriptLoc}/output/${cloud}_${user_prefix}.tfstate" > /dev/null 2>&1
+        terraform show -no-color ${scriptLoc}/output/${cloud}_${user_prefix}.tfstate | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" | sed "s/ = /: /g" > tfshow.yaml
         cd $scriptLoc;
-        python azure/scripts/azure_json.py
+        python azure/scripts/azure_json.py ${user_prefix}
         echo "=======================================================================";
-        echo "   The JSON output file is azure_output.json";
+        echo "   The JSON output file is azure_${user_prefix}_output.json";
         echo "=======================================================================";
 
     fi
@@ -328,5 +302,8 @@ if [[ "$action" == "apply" || "$action" == "reset" ]]; then
 fi
 
 if [[ "${action}" == "destroy" ]]; then
-    destroy
+    if [[ "$1" == "--user_prefix" ]]; then
+        user_prefix=$2;
+        destroy $user_prefix;
+    fi
 fi

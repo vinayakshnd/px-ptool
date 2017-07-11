@@ -27,8 +27,6 @@ This script takes two positional parameters:
 
 Following are additional flags which are to be provided in case of `apply` or `reset`
 
-`--auth`        : Access token in case of digitalocean,| delimited string with project name and path to service account json file for gcp and | delimited string with AZURE_SUBSCRIPTION_ID,AZURE_CLIENT_ID,AZURE_CLIENT_SECRET,AZURE_TENANT_ID for azure
-
 `--vm_creds`    : | delimited string with public and private key for gcp and digitalocean, username and password for azure
 
 `--region`      : Region in which the VMs and disks should be created

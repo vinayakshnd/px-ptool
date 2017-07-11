@@ -8,4 +8,4 @@ digitalocean/ssh/*.ppk
 digitalocean/ssh/*.pub
 gcp/credentials/*.ppk
 gcp/credentials/*.pub
-
+output/*

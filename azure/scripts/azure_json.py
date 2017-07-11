@@ -1,11 +1,13 @@
 import yaml
 import json
+import sys
 
+prefix = sys.argv[1]
 json_out = []
 yaml_file = 'azure/tfshow.yaml'
-out_file = 'azure_output.json'
+out_file = 'output/azure_{}_output.json'.format(prefix)
 
-with open('azure/terraform.tfvars', mode='r') as f:
+with open('output/azure_{}_terraform.tfvars'.format(prefix), mode='r') as f:
     admincfg = f.readlines()
 username = ''
 password = ''

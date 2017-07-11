@@ -4,10 +4,12 @@ variable "do_token" {}
 
 variable "public_key_file" {
   description = "Location of the public key file"
+  default = "~/.ssh/id_rsa.pub"
 }
 
 variable "private_key_file" {
   description = "Location of the private key file"
+  default = "~/.ssh/id_rsa"
 }
 
 variable "px_region" {

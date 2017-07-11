@@ -9,8 +9,9 @@ import time
 #    cfg = yaml.load(admincfg)
 
 action = sys.argv[1]
+prefix = sys.argv[2]
 
-with open('gcp/terraform.tfvars', mode='r') as f:
+with open('output/gcp_{}_terraform.tfvars'.format(prefix), mode='r') as f:
     cfg = f.readlines()
 
 service_key = ''
@@ -50,7 +51,7 @@ for i in result['items']:
                            "Passwd": private_key,
                            "Port": 22}
         json_out.append(inst_details)
-        with open('gcp_output.json', mode='w') as f:
+        with open('output/gcp_{}_output.json'.format(prefix), mode='w') as f:
             f.write(json.dumps(json_out, indent=4))
 
 
@@ -75,7 +76,8 @@ for inst in inst_dict.keys():
                 print "INFO : detaching disk {} from instance {}".format(disk, inst)
                 res = compute.instances().detachDisk(project=project, zone=zone, instance=inst,
                                                      deviceName=disk).execute()
+                time.sleep(2)
 #
 # Calling a small sleep to ensure last volume is deleted before we call destruction
-if action == 'detach':
-    time.sleep(5)
+#if action == 'detach':
+#    time.sleep(5)

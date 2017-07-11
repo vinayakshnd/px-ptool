@@ -7,6 +7,6 @@ provider "azurerm" {
 
 
 resource "azurerm_resource_group" "rg" {
-name     = "px-azure-rg"
+name     = "px-azure-rg-${var.user_prefix}"
 location = "${var.px_region}"
 }

@@ -10,10 +10,11 @@ terraform makes it very painful to attach / detach volumes with droplets
 """
 
 action = sys.argv[1]
+user_prefix = sys.argv[2]
 #with open('config.yaml', mode='r') as f:
 #    ycfg = yaml.load(f)
 
-with open('digitalocean/terraform.tfvars', mode='r') as f:
+with open('output/digitalocean_{}_terraform.tfvars'.format(user_prefix), mode='r') as f:
     ycfg = f.readlines()
 do_token = ''
 do_region = ''
@@ -37,25 +38,28 @@ resp = requests.get('https://api.digitalocean.com/v2/volumes', headers=auth_head
 vol_dict = {}
 print "INFO : Getting all Volumes"
 for v in resp.json()['volumes']:
-    vol_dict[v['name']] = v['id']
+    if v['name'].startswith('do-vol-{}'.format(prefix)):
+        vol_dict[v['name']] = v['id']
 
 resp = requests.get('https://api.digitalocean.com/v2/droplets', headers=auth_header)
 drop_dict = {}
 print "INFO : Getting all Droplets"
 for d in resp.json()['droplets']:
-    drop_dict[d['name']] = d['id']
+    if d['name'].startswith('px-{}-node'.format(prefix)):
+        drop_dict[d['name']] = d['id']
 #
 # If action is attach then generate output json
 #
 json_out = []
 if action == 'attach':
     for d in resp.json()['droplets']:
-        droplet_details = {"User": "root",
-                           "PublicIpAddress": d['networks']['v4'][0]['ip_address'],
-                           "Passwd": private_key,
-                           "Port": 22}
-        json_out.append(droplet_details)
-    with open('digitalocean_output.json', mode='w') as f:
+        if d['name'].startswith('px-{}-node'.format(prefix)):
+            droplet_details = {"User": "root",
+                               "PublicIpAddress": d['networks']['v4'][0]['ip_address'],
+                               "Passwd": private_key,
+                               "Port": 22}
+            json_out.append(droplet_details)
+    with open('output/digitalocean_{}_output.json'.format(user_prefix), mode='w') as f:
         f.write(json.dumps(json_out, indent=4))
 
 

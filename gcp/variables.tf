@@ -24,17 +24,17 @@ variable "px_image" {
 
 variable "credentials_file_path" {
   description = "Path to the JSON file used to describe your account credentials"
-  default     = "credentials/account.json"
+  default     = "credentials/terraform.json"
 }
 
 variable "public_key_path" {
   description = "Path to file containing public key"
-  default     = "credentials/id_rsa.pub"
+  default     = "~/.ssh/id_rsa.pub"
 }
 
 variable "private_key_path" {
   description = "Path to file containing private key"
-  default     = "credentials/id_rsa"
+  default     = "~/.ssh/id_rsa"
 }
 
 variable "user_prefix" {
