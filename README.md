@@ -10,14 +10,17 @@ This set of scripts can be used for following:
 ## Pre-requisites
 
 *  A terminal which works with bash. For windows machines, cygwin, mobaXterm or GitBash can be used.
-*  Python 2.7 and pip.
-*  Go to repository location and run `pip install -r requirements.txt`
+*  Docker installation
 *  Digital Ocean token to spawn droplets and volumes
 *  GCP service account JSON file for access to GCP
 *  Azure subscription ID, Client ID, Client Secret and Azure tenant ID. Following [link](https://www.terraform.io/docs/providers/azurerm/#creating-credentials-in-the-azure-portal) has all the details.
 
 
 ## Usage
+
+`docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:1.0 <SUB COMMAND>`
+
+### Sub Command Explanation:
 
 `px_provision.sh` is the main script.
 This script takes two positional parameters:
@@ -26,8 +29,6 @@ This script takes two positional parameters:
 2.  Cloud Name (digitalocean or gcp or azure)
 
 Following are additional flags which are to be provided in case of `apply` or `reset`
-
-`--vm_creds`    : | delimited string with public and private key for gcp and digitalocean, username and password for azure
 
 `--region`      : Region in which the VMs and disks should be created
 
@@ -48,8 +49,8 @@ Reset does a destroy followed by apply.
 ### Example : To create VMs and Disks on azure
 
 ~~~
+docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:1.0 \
 ./px_provision.sh apply azure \
---auth 'AZURE_SUBSCRIPTION_ID|AZURE_CLIENT_ID|AZURE_CLIENT_SECRET|AZURE_TENANT_ID' \
 --vm_creds 'poot|s3cretP@ss' \
 --region 'West Europe' \
 --image 'Canonical|UbuntuServer|14.04.2-LTS|latest' \
@@ -63,9 +64,8 @@ Reset does a destroy followed by apply.
 ### Example : To create VMs and Disks on GCP
 
 ~~~
+docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:1.0 \
 ./px_provision.sh apply gcp \
---auth 'omni-163105|credentials/terraform.json' \
---vm_creds 'credentials/public_key.pub|credentials/private_key.ppk' \
 --region 'us-central1|us-central1-a' \
 --image 'ubuntu-os-cloud/ubuntu-1604-xenial-v20170330' \
 --size 'n1-standard-1' \
@@ -78,9 +78,8 @@ Reset does a destroy followed by apply.
 ### Example : To create VMs and Disks on DigitalOcean
 
 ~~~
+docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:1.0 \
 ./px_provision.sh apply digitalocean \
---auth 'DO_TOKEN' \
---vm_creds 'ssh/public_key.pub|ssh/private_key.ppk' \
 --region 'sfo2' \
 --image 'centos-7-x64' \
 --size '2gb' \
@@ -93,13 +92,13 @@ Reset does a destroy followed by apply.
 ### Example : TO destroy VMs and Disks
 
 *  On Azure:
-`px_provision.sh azure destroy`
+`px_provision.sh azure destroy --user_prefix 'poot'`
 
 *  On DigitalOcean:
-`px_provision.sh digitalocean destroy`
+`px_provision.sh digitalocean destroy --user_prefix 'bird'`
 
 *  On Google Cloud:
-`px_provision.sh gcp destroy`
+`px_provision.sh gcp destroy --user_prefix 'bodie'`
 
 
 **Note for GCP** A service account must be created and the json file from this service account should be copied to gcp/credentials directory.
