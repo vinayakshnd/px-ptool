@@ -84,8 +84,8 @@ if [[ "${cloud}" == "digitalocean" ]]; then
 
 cat <<EOF > output/digitalocean_${user_prefix}_terraform.tfvars
 do_token = "${TF_VAR_do_token}"
-public_key_file = "${vm_pub_key}"
-private_key_file = "${vm_pri_key}"
+public_key_file = "~/.ssh/id_rsa.pub"
+private_key_file = "~/.ssh/id_rsa"
 px_region = "${region}"
 px_image = "${image}"
 px_vm_size = "${size}"
@@ -104,8 +104,8 @@ project = "${GCP_PROJECT}"
 credentials_file_path = "credentials/terraform.json"
 px_region = "${gcp_region}"
 px_region_zone = "${gcp_region_zone}"
-public_key_path = "${vm_pub_key}"
-private_key_path = "${vm_pri_key}"
+public_key_path = "~/.ssh/id_rsa.pub"
+private_key_path = "~/.ssh/id_rsa"
 px_image = "${image}"
 px_vm_size = "${size}"
 px_node_count = ${nodes}

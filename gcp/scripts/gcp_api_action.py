@@ -79,5 +79,5 @@ for inst in inst_dict.keys():
                 time.sleep(2)
 #
 # Calling a small sleep to ensure last volume is deleted before we call destruction
-#if action == 'detach':
-#    time.sleep(5)
+if action == 'detach':
+    time.sleep(5)
