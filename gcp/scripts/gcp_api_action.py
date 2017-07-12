@@ -43,16 +43,18 @@ result = compute.instances().list(project=project, zone=zone).execute()
 inst_dict = {}
 json_out = []
 print "INFO : Getting all instances"
+
 for i in result['items']:
-    inst_dict[i['name']] = i['id']
-    if action == 'attach':
-        inst_details = {"User": "root",
+    if i['name'].startswith('px-gcp-node-{}-'.format(user_prefix)):
+        inst_dict[i['name']] = i['id']
+        if action == 'attach':
+            inst_details = {"User": "root",
                            "PublicIpAddress": i['networkInterfaces'][0]['accessConfigs'][0]['natIP'],
                            "Passwd": private_key,
                            "Port": 22}
-        json_out.append(inst_details)
-        with open('output/gcp_{}_output.json'.format(prefix), mode='w') as f:
-            f.write(json.dumps(json_out, indent=4))
+            json_out.append(inst_details)
+            with open('output/gcp_{}_output.json'.format(prefix), mode='w') as f:
+                f.write(json.dumps(json_out, indent=4))
 
 
 
@@ -63,20 +65,22 @@ for d in result['items']:
     disk_dict[d['name']] = d['selfLink']
 
 for inst in inst_dict.keys():
-    inst_index = inst.split('-')[-1]
-    for disk in disk_dict.keys():
-        if disk.startswith('px-gcp-vol-{}-{}'.format(user_prefix, inst_index)):
-            if action == 'attach':
-                print "INFO : attaching disk {} to instance {}".format(disk, inst)
-                body = {"type": "PERSISTENT", "mode": "READ_WRITE", "source": disk_dict[disk],
+    if inst.startswith('px-gcp-node-{}-'.format(user_prefix)):
+        inst_index = inst.split('-')[-1]
+        for disk in disk_dict.keys():
+            if disk.startswith('px-gcp-vol-{}-{}'.format(user_prefix, inst_index)):
+                if action == 'attach':
+                    print "INFO : attaching disk {} to instance {}".format(disk, inst)
+                    body = {"type": "PERSISTENT", "mode": "READ_WRITE", "source": disk_dict[disk],
                         "deviceName": disk, "boot": False, "autoDelete": False, "interface": "SCSI"}
-                res = compute.instances().attachDisk(project=project, zone=zone,
+                    res = compute.instances().attachDisk(project=project, zone=zone,
                                                      instance=inst, body=body).execute()
-            if action == 'detach':
-                print "INFO : detaching disk {} from instance {}".format(disk, inst)
-                res = compute.instances().detachDisk(project=project, zone=zone, instance=inst,
+                if action == 'detach':
+                    print "INFO : detaching disk {} from instance {}".format(disk, inst)
+                    res = compute.instances().detachDisk(project=project, zone=zone, instance=inst,
                                                      deviceName=disk).execute()
-                time.sleep(2)
+                    time.sleep(2)
+
 #
 # Calling a small sleep to ensure last volume is deleted before we call destruction
 if action == 'detach':
