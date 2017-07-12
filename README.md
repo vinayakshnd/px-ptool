@@ -1,6 +1,6 @@
-# Provisioning scripts for multiple clouds
+# Provisioning container for multiple clouds
 
-This set of scripts can be used for following:
+This container can be used for following:
 
 *  Specify Cloud, VM and Disk specific parameters as flags to `px_provision.sh`
 *  Spawn instances and disks per specifications mentioned above
@@ -10,15 +10,17 @@ This set of scripts can be used for following:
 ## Pre-requisites
 
 *  A terminal which works with bash. For windows machines, cygwin, mobaXterm or GitBash can be used.
+*  SSH key pair to be copied to `keys` directory of this repository. The public and private keys should be named id_rsa.pub and id_rsa respectively. This keypair will be used to log on to VMs of digitalocean and GCP.
 *  Docker installation
 *  Digital Ocean token to spawn droplets and volumes
+*  Import ssh key of step 2 in DigitalOcean
 *  GCP service account JSON file for access to GCP
 *  Azure subscription ID, Client ID, Client Secret and Azure tenant ID. Following [link](https://www.terraform.io/docs/providers/azurerm/#creating-credentials-in-the-azure-portal) has all the details.
 
 
 ## Usage
 
-`docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:1.0 <SUB COMMAND>`
+`docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:1.4 <SUB COMMAND>`
 
 ### Sub Command Explanation:
 
@@ -44,61 +46,61 @@ Following are additional flags which are to be provided in case of `apply` or `r
 
 `--user_prefix` : Unique identifier for user's resources
 
+**Azure Only**
+`--vm_creds`    : '|' separated username and password to be used on azure nodes.
+
 Reset does a destroy followed by apply.
 
 ### Example : To create VMs and Disks on azure
 
 ~~~
-docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:1.0 \
-./px_provision.sh apply azure \
---vm_creds 'poot|s3cretP@ss' \
+docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:1.4 ./px_provision.sh apply azure \
+--vm_creds 'nodeadm|s3cretP@ss' \
 --region 'West Europe' \
 --image 'Canonical|UbuntuServer|14.04.2-LTS|latest' \
 --size 'Standard_A1_V2' \
 --nodes 2 \
 --disks 2 \
 --disk_size 10 \
---user_prefix 'poot';
+--user_prefix 'deangelo'
 ~~~
 
 ### Example : To create VMs and Disks on GCP
 
 ~~~
-docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:1.0 \
-./px_provision.sh apply gcp \
+docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:1.3 ./px_provision.sh apply gcp \
 --region 'us-central1|us-central1-a' \
 --image 'ubuntu-os-cloud/ubuntu-1604-xenial-v20170330' \
 --size 'n1-standard-1' \
 --nodes 2 \
 --disks 2 \
 --disk_size 10 \
---user_prefix 'bodie';
+--user_prefix 'weebey'
 ~~~
 
 ### Example : To create VMs and Disks on DigitalOcean
 
 ~~~
-docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:1.0 \
-./px_provision.sh apply digitalocean \
+docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:1.3 ./px_provision.sh apply digitalocean \
 --region 'sfo2' \
 --image 'centos-7-x64' \
 --size '2gb' \
 --nodes 2 \
 --disks 2 \
 --disk_size 10 \
---user_prefix 'bird';
+--user_prefix 'savino'
 ~~~
 
 ### Example : TO destroy VMs and Disks
 
 *  On Azure:
-`px_provision.sh azure destroy --user_prefix 'poot'`
+`px_provision.sh azure destroy --user_prefix 'deangelo'`
 
 *  On DigitalOcean:
-`px_provision.sh digitalocean destroy --user_prefix 'bird'`
+`px_provision.sh digitalocean destroy --user_prefix 'savino'`
 
 *  On Google Cloud:
-`px_provision.sh gcp destroy --user_prefix 'bodie'`
+`px_provision.sh gcp destroy --user_prefix 'weebey'`
 
 
 **Note for GCP** A service account must be created and the json file from this service account should be copied to gcp/credentials directory.
