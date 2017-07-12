@@ -180,7 +180,7 @@ destroy(){
          python gcp/scripts/gcp_api_action.py detach ${user_prefix};
     fi
     cd $cloud;
-    terraform destroy -force -var-file="${scriptLoc}/output/${cloud}_${user_prefix}_terraform.tfvars" -state="${scriptLoc}/output/${cloud}_${user_prefix}.tfstate";
+    terraform destroy -no-color -force -var-file="${scriptLoc}/output/${cloud}_${user_prefix}_terraform.tfvars" -state="${scriptLoc}/output/${cloud}_${user_prefix}.tfstate";
 }
 
 #
@@ -261,7 +261,7 @@ if [[ "$action" == "apply" || "$action" == "reset" ]]; then
         add_azure_disks $disks
     fi
     cd $cloud;
-    terraform apply -var-file="${scriptLoc}/output/${cloud}_${user_prefix}_terraform.tfvars" -state="${scriptLoc}/output/${cloud}_${user_prefix}.tfstate";
+    terraform apply -no-color -var-file="${scriptLoc}/output/${cloud}_${user_prefix}_terraform.tfvars" -state="${scriptLoc}/output/${cloud}_${user_prefix}.tfstate";
     cd $scriptLoc;
     #
     # Trigger Post actions
@@ -289,7 +289,7 @@ if [[ "$action" == "apply" || "$action" == "reset" ]]; then
 #
     if [[ "${cloud}" == "azure" ]]; then
         cd azure;
-        terraform apply -var-file="${scriptLoc}/output/${cloud}_${user_prefix}_terraform.tfvars" -state="${scriptLoc}/output/${cloud}_${user_prefix}.tfstate" > /dev/null 2>&1
+        terraform apply -no-color -var-file="${scriptLoc}/output/${cloud}_${user_prefix}_terraform.tfvars" -state="${scriptLoc}/output/${cloud}_${user_prefix}.tfstate" > /dev/null 2>&1
         terraform show -no-color ${scriptLoc}/output/${cloud}_${user_prefix}.tfstate | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" | sed "s/ = /: /g" > tfshow.yaml
         cd $scriptLoc;
         python azure/scripts/azure_json.py ${user_prefix}
