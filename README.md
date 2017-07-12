@@ -10,7 +10,7 @@ This container can be used for following:
 ## Pre-requisites
 
 *  A terminal which works with bash. For windows machines, cygwin, mobaXterm or GitBash can be used.
-*  SSH key pair to be copied to `keys` directory of this repository. The public and private keys should be named id_rsa.pub and id_rsa respectively. This keypair will be used to log on to VMs of digitalocean and GCP.
+*  SSH key pair to be copied to `keys` directory of this repository. The public and private keys should be named id_rsa.pub and id_rsa respectively. This keypair will be used to log on to VMs of GCP.For DigitalOcean, manually upload the keypair, get the fingerprint of the key and specify it in Dockerfile as DO_PUBKEY_FP  ENV variable.
 *  Docker installation
 *  Digital Ocean token to spawn droplets and volumes
 *  Import ssh key of step 2 in DigitalOcean
