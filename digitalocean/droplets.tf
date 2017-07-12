@@ -4,6 +4,6 @@ resource "digitalocean_droplet" "px-node-droplet"{
   image = "${var.px_image}"
   region = "${var.px_region}"
   size = "${var.px_vm_size}"
-  ssh_keys = ["${digitalocean_ssh_key.default.fingerprint}"]
+  ssh_keys = ["${var.public_key_fp}"]
 
 }

@@ -2,9 +2,8 @@
 # or using -var="do_token=..." CLI option
 variable "do_token" {}
 
-variable "public_key_file" {
-  description = "Location of the public key file"
-  default = "~/.ssh/id_rsa.pub"
+variable "public_key_fp" {
+  description = "Fingerprint of the public key file"
 }
 
 variable "private_key_file" {

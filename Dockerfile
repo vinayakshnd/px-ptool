@@ -8,6 +8,7 @@ COPY . /root/px_prov/
 WORKDIR /root/px_prov
 RUN pip install -r requirements.txt && chmod 755 px_provision.sh
 ENV TF_VAR_do_token '____YOUR_DO_TOKEN____'
+ENV DO_PUBKEY_FP "_FINGERPRINT_OF_KEY_IN_DO_"
 ENV TF_VAR_azure_subscription_id "_AZURE_SUB_ID_"
 ENV TF_VAR_azure_client_id "_AZURE_CLIENT_ID_"
 ENV TF_VAR_azure_client_secret "_AZURE_CLIENT_SECRET_"

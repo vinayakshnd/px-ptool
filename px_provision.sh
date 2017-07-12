@@ -84,7 +84,7 @@ if [[ "${cloud}" == "digitalocean" ]]; then
 
 cat <<EOF > output/digitalocean_${user_prefix}_terraform.tfvars
 do_token = "${TF_VAR_do_token}"
-public_key_file = "~/.ssh/id_rsa.pub"
+public_key_fp = "${DO_PUBKEY_FP}"
 private_key_file = "~/.ssh/id_rsa"
 px_region = "${region}"
 px_image = "${image}"
