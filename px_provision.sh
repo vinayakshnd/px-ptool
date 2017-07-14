@@ -54,8 +54,8 @@ fi
 
 if [[ "${cloud}" == "gcp" ]]; then
 
-    #gcp_project=$(echo $auth | cut -d "|" -f1);
-    #gcp_sa_json=$(echo $auth | cut -d "|" -f2);
+    gcp_project=$(echo $auth | cut -d "|" -f1);
+    gcp_sa_json=$(echo $auth | cut -d "|" -f2);
     gcp_region=$(echo $region | cut -d "|" -f1);
     gcp_region_zone=$(echo $region | cut -d "|" -f2);
 fi
@@ -81,10 +81,18 @@ gen_tfvars(){
 split_params;
 cd $scriptLoc;
 if [[ "${cloud}" == "digitalocean" ]]; then
+    if [[ "${TF_VAR_do_token}" != "" ]]; then
+        auth=${TF_VAR_do_token};
+    fi
+    if [[ "${DO_PUBKEY_FP}" != "" ]]; then
+        vm_pub_key=${DO_PUBKEY_FP}
+    fi
 
+echo "--------- HARSHAL : value of token is ${auth} and fingerprint is ${vm_pub_key} ===============";
+read DKBOSE;
 cat <<EOF > output/digitalocean_${user_prefix}_terraform.tfvars
-do_token = "${TF_VAR_do_token}"
-public_key_fp = "${DO_PUBKEY_FP}"
+do_token = "${auth}"
+public_key_fp = "${vm_pub_key}"
 private_key_file = "~/.ssh/id_rsa"
 px_region = "${region}"
 px_image = "${image}"
@@ -98,9 +106,16 @@ EOF
 fi
 
 if [[ "${cloud}" == "gcp" ]]; then
-echo "${GCP_SA_JSON}" > gcp/credentials/terraform.json
+    if [[ "${GCP_SA_JSON}" != "" ]]; then
+        echo "${GCP_SA_JSON}" > gcp/credentials/terraform.json
+    fi
+
+    if [[ "${GCP_PROJECT}" != "" ]]; then
+        gcp_project="${GCP_PROJECT}"
+    fi
+
 cat <<EOF > output/gcp_${user_prefix}_terraform.tfvars
-project = "${GCP_PROJECT}"
+project = "${gcp_project}"
 credentials_file_path = "credentials/terraform.json"
 px_region = "${gcp_region}"
 px_region_zone = "${gcp_region_zone}"
@@ -118,11 +133,17 @@ fi
 
 if [[ "${cloud}" == "azure" ]]; then
 
+    if [[ "${TF_VAR_azure_subscription_id}" != "" ]]; then
+        azure_sub_id=${TF_VAR_azure_subscription_id}
+        azure_client_id=${TF_VAR_azure_client_id};
+        azure_client_secret=${TF_VAR_azure_client_secret};
+        azure_tenant_id={TF_VAR_azure_tenant_id};
+    fi
 cat <<EOF > output/azure_${user_prefix}_terraform.tfvars
-azure_subscription_id = "${TF_VAR_azure_subscription_id}"
-azure_client_id = "${TF_VAR_azure_client_id}"
-azure_client_secret = "${TF_VAR_azure_client_secret}"
-azure_tenant_id = "${TF_VAR_azure_tenant_id}"
+azure_subscription_id = "${azure_sub_id}"
+azure_client_id = "${azure_client_id}"
+azure_client_secret = "${azure_client_secret}"
+azure_tenant_id = "${azure_tenant_id}"
 px_region = "${region}"
 vm_image_publisher = "${azure_image_pub}"
 vm_image_offer = "${azure_image_offer}"
@@ -140,38 +161,12 @@ fi
 
 }
 
-add_azure_disks(){
-
-disks_count=$1;
-inst_file=azure/instances.tf
-
-cp -f ${inst_file}.tpl ${inst_file};
-#
-# Remove last char from instances.tf
-sed -i '$ s/.$//' ${inst_file}
-for d in $(seq ${disks_count})
-do
-  cat<<EOF >> ${inst_file}
-  storage_data_disk {
-    name          = "datadisk\${var.user_prefix}\${count.index + 1}${d}"
-    vhd_uri       = "\${azurerm_storage_account.astgacc.primary_blob_endpoint}\${azurerm_storage_container.astgctnr.name}/datadisk\${var.user_prefix}\${count.index + 1}${d}.vhd"
-    disk_size_gb  = "\${var.px_disk_size}"
-    create_option = "Empty"
-    lun           = "$(( $d - 1 ))"
-  }
-
-EOF
-done
-
-echo "}" >> ${inst_file}
-
-}
-
 destroy(){
 
     cd $scriptLoc;
-    echo "${GCP_SA_JSON}" > gcp/credentials/terraform.json
-
+    if [[ "${GCP_SA_JSON}" != "" ]]; then
+        echo "${GCP_SA_JSON}" > gcp/credentials/terraform.json
+    fi
 
     if [[ "${cloud}" == "digitalocean" ]]; then
         python digitalocean/scripts/do_api_action.py detach ${user_prefix};
@@ -256,10 +251,6 @@ if [[ "$action" == "apply" || "$action" == "reset" ]]; then
     fi
 
     gen_tfvars;
-    if [[ "${cloud}" == "azure" ]]; then
-        disks=$(grep "^px_disk_count" output/${cloud}_${user_prefix}_terraform.tfvars | cut -d"=" -f2 | tr -cd '[:alnum:]')
-        add_azure_disks $disks
-    fi
     cd $cloud;
     terraform apply -no-color -var-file="${scriptLoc}/output/${cloud}_${user_prefix}_terraform.tfvars" -state="${scriptLoc}/output/${cloud}_${user_prefix}.tfstate";
     cd $scriptLoc;

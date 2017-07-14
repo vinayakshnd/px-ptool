@@ -9,3 +9,4 @@ digitalocean/ssh/*.pub
 gcp/credentials/*.ppk
 gcp/credentials/*.pub
 output/*
+keys/id*

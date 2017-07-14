@@ -54,19 +54,35 @@ resource "azurerm_virtual_machine" "avm" {
   }
 
   storage_data_disk {
-    name          = "datadisk${var.user_prefix}${count.index + 1}1"
-    vhd_uri       = "${azurerm_storage_account.astgacc.primary_blob_endpoint}${azurerm_storage_container.astgctnr.name}/datadisk${var.user_prefix}${count.index + 1}1.vhd"
-    disk_size_gb  = "${var.px_disk_size}"
+    name          = "dd-${var.user_prefix}-swap-${count.index + 1}"
+    vhd_uri       = "${azurerm_storage_account.astgacc.primary_blob_endpoint}${azurerm_storage_container.astgctnr.name}/dd-${var.user_prefix}-swap-${count.index + 1}.vhd"
+    disk_size_gb  = "8"
     create_option = "Empty"
     lun           = "0"
   }
 
   storage_data_disk {
-    name          = "datadisk${var.user_prefix}${count.index + 1}2"
-    vhd_uri       = "${azurerm_storage_account.astgacc.primary_blob_endpoint}${azurerm_storage_container.astgctnr.name}/datadisk${var.user_prefix}${count.index + 1}2.vhd"
-    disk_size_gb  = "${var.px_disk_size}"
+    name          = "dd-${var.user_prefix}-docker-${count.index + 1}"
+    vhd_uri       = "${azurerm_storage_account.astgacc.primary_blob_endpoint}${azurerm_storage_container.astgctnr.name}/dd-${var.user_prefix}-docker-${count.index + 1}.vhd"
+    disk_size_gb  = "64"
     create_option = "Empty"
     lun           = "1"
+  }
+
+    storage_data_disk {
+    name          = "dd-${var.user_prefix}-disk1-${count.index + 1}"
+    vhd_uri       = "${azurerm_storage_account.astgacc.primary_blob_endpoint}${azurerm_storage_container.astgctnr.name}/dd-${var.user_prefix}-disk1-${count.index + 1}.vhd"
+    disk_size_gb  = "128"
+    create_option = "Empty"
+    lun           = "2"
+  }
+
+  storage_data_disk {
+    name          = "dd-${var.user_prefix}-disk2-${count.index + 1}"
+    vhd_uri       = "${azurerm_storage_account.astgacc.primary_blob_endpoint}${azurerm_storage_container.astgctnr.name}/dd-${var.user_prefix}-disk2-${count.index + 1}.vhd"
+    disk_size_gb  = "64"
+    create_option = "Empty"
+    lun           = "3"
   }
 
 }

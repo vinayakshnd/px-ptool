@@ -53,10 +53,9 @@ for i in result['items']:
                            "Passwd": private_key,
                            "Port": 22}
             json_out.append(inst_details)
-            with open('output/gcp_{}_output.json'.format(prefix), mode='w') as f:
-                f.write(json.dumps(json_out, indent=4))
 
-
+with open('output/gcp_{}_output.json'.format(prefix), mode='w') as f:
+    f.write(json.dumps(json_out, indent=4))
 
 result = compute.disks().list(project=project, zone=zone).execute()
 disk_dict = {}
@@ -68,7 +67,7 @@ for inst in inst_dict.keys():
     if inst.startswith('px-gcp-node-{}-'.format(user_prefix)):
         inst_index = inst.split('-')[-1]
         for disk in disk_dict.keys():
-            if disk.startswith('px-gcp-vol-{}-{}'.format(user_prefix, inst_index)):
+            if disk.startswith('px-gcp-{}-'.format(user_prefix)) and disk.endswith('-{}'.format(inst_index)):
                 if action == 'attach':
                     print "INFO : attaching disk {} to instance {}".format(disk, inst)
                     body = {"type": "PERSISTENT", "mode": "READ_WRITE", "source": disk_dict[disk],
