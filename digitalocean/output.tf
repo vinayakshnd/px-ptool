@@ -1,19 +1,19 @@
-output "do_droplets" {
-  value = ["${digitalocean_droplet.px-node-droplet.*.name}"]
+output "do_region" {
+  value = "${var.px_region}"
 }
 
-output "do_swap_volumes" {
-  value = ["${digitalocean_volume.do-swap-vol.*.name}"]
+output "private_key_file" {
+  value = "${var.private_key_file}"
 }
 
-output "do_docker_volumes" {
-  value = ["${digitalocean_volume.do-docker-vol.*.name}"]
+output "do_node_public_ips" {
+  value = ["${digitalocean_droplet.px-node-droplet.*.ipv4_address}"]
 }
 
-output "do_disk1_volumes" {
-  value = ["${digitalocean_volume.do-disk1-vol.*.name}"]
+output "vm_admin_user" {
+  value = "${var.vm_admin_user}"
 }
 
-output "do_disk2_volumes" {
-  value = ["${digitalocean_volume.do-disk2-vol.*.name}"]
+output "vm_admin_password" {
+  value = "${var.vm_admin_password}"
 }

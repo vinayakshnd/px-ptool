@@ -31,16 +31,36 @@ variable "px_node_count" {
   description = "Number of worker droplets"
 }
 
-variable "px_disk_count" {
-  default = 3
-  description = "Number of disks per node"
-}
-
-variable "px_disk_size" {
-  default = 10
-  description = "Size of volumes to be created"
-}
-
 variable "user_prefix" {
   description = "Prefix to identify users resources, ideally a user-id"
+}
+
+variable "vm_admin_user" {
+  description = "Admin user for the VM"
+  default = "admuser"
+}
+
+variable "vm_admin_password" {
+  description = "Password for admin user of VM"
+  default = "s3cret"
+}
+
+variable "swap_vol_size" {
+  description = "Size in GB of SWAP volume"
+  default = 8
+}
+
+variable "docker_vol_size" {
+  description = "Size in GB of Docker volume"
+  default = 64
+}
+
+variable "disk1_vol_size" {
+  description = "Size in GB of disk1 volume"
+  default = 128
+}
+
+variable "disk2_vol_size" {
+  description = "Size in GB of disk1 volume"
+  default = 64
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-MYUSER='admuser';
-MYPASS='s3cret';
+MYUSER=$1;
+MYPASS=$2;
 #
 # Enable password based login
 #
@@ -13,6 +13,6 @@ useradd -p $(openssl passwd -1 ${MYPASS}) ${MYUSER}
 
 #
 # Add user to sudoers
-usermod -aG sudo ${MYUSER}
+#usermod -aG sudo ${MYUSER}
 
 echo "${MYUSER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers

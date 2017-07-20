@@ -15,4 +15,4 @@ ENV TF_VAR_azure_client_secret "_AZURE_CLIENT_SECRET_"
 ENV TF_VAR_azure_tenant_id "_AZURE_TENANT_ID_"
 ENV GCP_PROJECT '_GCP_PROJECT_ID_'
 ENV GCP_SA_JSON '_CONTENTS_OF_GCP_SERVICE_ACCOUNT_JSON_FILE_'
-CMD px_provision.sh
+CMD python px_provision.py

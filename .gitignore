@@ -10,3 +10,6 @@ gcp/credentials/*.ppk
 gcp/credentials/*.pub
 output/*
 keys/id*
+*/creds.tfvars
+cred_init.rc
+**/*.pyc
