@@ -27,10 +27,9 @@ def do_output_json(drop_objs, user_prefix):
     public_ip = ''
     adm_user = get_tf_out(user_prefix, 'vm_admin_user')
     adm_pass = get_tf_out(user_prefix, 'vm_admin_password')
-    #pk = paramiko.RSAKey.from_private_key_file('keys/id_rsa')
-    docker_disk = ''
-    other_disks = []
     for d in drop_objs:
+        docker_disk = ''
+        other_disks = []
         for n in d['networks']['v4']:
             if n['type'] == 'private':
                 private_ip = n['ip_address']
