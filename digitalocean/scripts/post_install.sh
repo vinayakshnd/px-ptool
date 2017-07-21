@@ -15,4 +15,5 @@ useradd -p $(openssl passwd -1 ${MYPASS}) ${MYUSER}
 # Add user to sudoers
 #usermod -aG sudo ${MYUSER}
 
+echo "Defaults:${MYUSER} !requiretty" >> /etc/sudoers
 echo "${MYUSER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
