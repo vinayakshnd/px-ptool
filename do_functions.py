@@ -50,6 +50,7 @@ def do_output_json(drop_objs, user_prefix):
                             "Passwd": adm_pass,
                             "PublicIpAddress": public_ip,
                             "PrivateIpAddress": private_ip,
+                            "Port": "22",
                             "DockerDisk": docker_disk,
                             "Disks": other_disks}
             json_out.append(drop_details)
