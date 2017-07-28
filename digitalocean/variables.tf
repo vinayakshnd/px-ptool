@@ -64,3 +64,7 @@ variable "disk2_vol_size" {
   description = "Size in GB of disk1 volume"
   default = 64
 }
+
+variable "px_ent_uuid" {
+  description = "UUID of Portworx Enterprise cluster"
+}

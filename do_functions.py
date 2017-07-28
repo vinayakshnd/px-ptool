@@ -28,32 +28,33 @@ def do_output_json(drop_objs, user_prefix):
     adm_user = get_tf_out(user_prefix, 'vm_admin_user')
     adm_pass = get_tf_out(user_prefix, 'vm_admin_password')
     for d in drop_objs:
-        docker_disk = ''
-        other_disks = []
-        for n in d['networks']['v4']:
-            if n['type'] == 'private':
-                private_ip = n['ip_address']
-            if n['type'] == 'public':
-                public_ip = n['ip_address']
-        if public_ip != '':
-            ssh = paramiko.SSHClient()
-            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh.connect(public_ip, username=adm_user, password=adm_pass)
-            stdin, stdout, stderr = ssh.exec_command("ls -l /dev/disk/by-id/*")
-            outlist = stdout.readlines()
-            for l in outlist:
-                if 'docker' in l.split(' ')[-3].strip().split('_')[-1]:
-                    docker_disk = "/dev/{}".format(l.split(' ')[-1].strip().split('/')[-1])
-                else:
-                    other_disks.append("/dev/{}".format(l.split(' ')[-1].strip().split('/')[-1]))
-            drop_details = {"User": adm_user,
-                            "Passwd": adm_pass,
-                            "PublicIpAddress": public_ip,
-                            "PrivateIpAddress": private_ip,
-                            "Port": "22",
-                            "DockerDisk": docker_disk,
-                            "Disks": other_disks}
-            json_out.append(drop_details)
+        if d['name'].startswith('px-{}-node-'.format(user_prefix)):
+            docker_disk = ''
+            other_disks = []
+            for n in d['networks']['v4']:
+                if n['type'] == 'private':
+                    private_ip = n['ip_address']
+                if n['type'] == 'public':
+                    public_ip = n['ip_address']
+            if public_ip != '':
+                ssh = paramiko.SSHClient()
+                ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                ssh.connect(public_ip, username=adm_user, password=adm_pass)
+                stdin, stdout, stderr = ssh.exec_command("ls -l /dev/disk/by-id/*")
+                outlist = stdout.readlines()
+                for l in outlist:
+                    if 'docker' in l.split(' ')[-3].strip().split('_')[-1]:
+                        docker_disk = "/dev/{}".format(l.split(' ')[-1].strip().split('/')[-1])
+                    else:
+                        other_disks.append("/dev/{}".format(l.split(' ')[-1].strip().split('/')[-1]))
+                drop_details = {"User": adm_user,
+                                "Passwd": adm_pass,
+                                "PublicIpAddress": public_ip,
+                                "PrivateIpAddress": private_ip,
+                                "Port": "22",
+                                "DockerDisk": docker_disk,
+                                "Disks": other_disks}
+                json_out.append(drop_details)
     with open('output/digitalocean_{}_output.json'.format(user_prefix), mode='w') as outfile:
         outfile.write(json.dumps(json_out, indent=4))
     print "========================================================"

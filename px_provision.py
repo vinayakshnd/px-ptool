@@ -1,6 +1,7 @@
 import argparse
 import os
 import subprocess
+import uuid
 from jinja2 import Template
 from do_functions import do_api_action
 
@@ -44,6 +45,7 @@ def get_args():
 
 def gen_tfvars(myargs):
     print "Action is {} Cloud is {} prefix is {}".format(myargs.action, myargs.cloud, myargs.user_prefix)
+    px_ent_uuid = str(uuid.uuid4())
     if os.path.exists('{}/extra_disks.tf'.format(myargs.cloud)):
         os.remove('{}/extra_disks.tf'.format(myargs.cloud))
     with open('output/{}_{}_terraform.tfvars'.format(myargs.cloud, myargs.user_prefix), mode='w') as f:
@@ -80,19 +82,20 @@ def gen_tfvars(myargs):
             print "Disk sizes are found to be {}".format(ds)
             gen_extra_disks(myargs.cloud, ds)
         if myargs.swap_vol_size > 0:
-            f.write('swap_vol_size = "{}"'.format(myargs.swap_vol_size))
+            f.write('swap_vol_size = "{}"\n'.format(myargs.swap_vol_size))
         if myargs.docker_vol_size > 0:
-            f.write('docker_vol_size = "{}"'.format(myargs.docker_vol_size))
+            f.write('docker_vol_size = "{}"\n'.format(myargs.docker_vol_size))
         if myargs.disk1_vol_size > 0:
-            f.write('disk1_vol_size = "{}"'.format(myargs.disk1_vol_size))
+            f.write('disk1_vol_size = "{}"\n'.format(myargs.disk1_vol_size))
         if myargs.disk2_vol_size > 0:
-            f.write('disk2_vol_size = "{}"'.format(myargs.disk2_vol_size))
+            f.write('disk2_vol_size = "{}"\n'.format(myargs.disk2_vol_size))
         if 'docker' in myargs.user_prefix:
             raise RuntimeError("Using word docker is not allowed in prefix.")
         else:
             # Filtering any non alnum chars from prefix
             myprefix = ''.join([c for c in myargs.user_prefix if c.isalnum()])
             f.write('user_prefix = "{}"\n'.format(myprefix))
+        f.write('px_ent_uuid = "{}"\n'.format(px_ent_uuid))
 
 
 def gen_creds(myargs):
