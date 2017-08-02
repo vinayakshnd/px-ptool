@@ -3,6 +3,7 @@ import time
 import json
 import subprocess
 import paramiko
+from px_functions import install_px
 
 def get_tf_out(user_prefix, prop):
     if prop == 'do_token':
@@ -55,6 +56,13 @@ def do_output_json(drop_objs, user_prefix):
                                 "DockerDisk": docker_disk,
                                 "Disks": other_disks}
                 json_out.append(drop_details)
+                px_installed, px_msg = install_px(public_ip, adm_user, adm_pass)
+                if px_installed:
+                    print "INFO : Portworx installed successfully on {}".format(public_ip)
+                else:
+                    print "ERROR : Portworx installation failed on {} with following error message: {}".\
+                        format(public_ip, px_msg)
+
     with open('output/digitalocean_{}_output.json'.format(user_prefix), mode='w') as outfile:
         outfile.write(json.dumps(json_out, indent=4))
     print "========================================================"
