@@ -10,6 +10,7 @@ MY_UUID=$3;
 OS_NAME=$(grep "^ID=" /etc/os-release | cut -d"=" -f2 | tr -cd '[:alnum:]')
 if [[ "${OS_NAME}" == "ubuntu" ]]; then
    SSH_SVC=ssh
+   mkdir -p /home/${MYUSER};
 else
    SSH_SVC=sshd
 fi
