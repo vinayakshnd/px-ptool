@@ -67,4 +67,5 @@ variable "disk2_vol_size" {
 
 variable "px_ent_uuid" {
   description = "UUID of Portworx Enterprise cluster"
+  default = '00000000-0000-0000-0000-000000000000'
 }
