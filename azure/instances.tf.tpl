@@ -24,6 +24,9 @@ resource "azurerm_virtual_machine" "avm" {
   resource_group_name   = "${azurerm_resource_group.rg.name}"
   network_interface_ids = ["${element(azurerm_network_interface.anetint.*.id, count.index)}"]
   vm_size = "${var.px_vm_size}"
+  delete_os_disk_on_termination = true
+
+  delete_data_disks_on_termination = true
 
   storage_image_reference {
     publisher = "${var.vm_image_publisher}"
@@ -53,4 +56,36 @@ resource "azurerm_virtual_machine" "avm" {
     environment = "${var.user_prefix}"
   }
 
+  storage_data_disk {
+    name          = "dd-${var.user_prefix}-swap-${count.index + 1}"
+    vhd_uri       = "${azurerm_storage_account.astgacc.primary_blob_endpoint}${azurerm_storage_container.astgctnr.name}/dd-${var.user_prefix}-swap-${count.index + 1}.vhd"
+    disk_size_gb  = "${var.swap_vol_size}"
+    create_option = "Empty"
+    lun           = "0"
+  }
+
+  storage_data_disk {
+    name          = "dd-${var.user_prefix}-docker-${count.index + 1}"
+    vhd_uri       = "${azurerm_storage_account.astgacc.primary_blob_endpoint}${azurerm_storage_container.astgctnr.name}/dd-${var.user_prefix}-docker-${count.index + 1}.vhd"
+    disk_size_gb  = "${var.docker_vol_size}"
+    create_option = "Empty"
+    lun           = "1"
+  }
+
+    storage_data_disk {
+    name          = "dd-${var.user_prefix}-disk1-${count.index + 1}"
+    vhd_uri       = "${azurerm_storage_account.astgacc.primary_blob_endpoint}${azurerm_storage_container.astgctnr.name}/dd-${var.user_prefix}-disk1-${count.index + 1}.vhd"
+    disk_size_gb  = "${var.disk1_vol_size}"
+    create_option = "Empty"
+    lun           = "2"
+  }
+
+  storage_data_disk {
+    name          = "dd-${var.user_prefix}-disk2-${count.index + 1}"
+    vhd_uri       = "${azurerm_storage_account.astgacc.primary_blob_endpoint}${azurerm_storage_container.astgctnr.name}/dd-${var.user_prefix}-disk2-${count.index + 1}.vhd"
+    disk_size_gb  = "${var.disk2_vol_size}"
+    create_option = "Empty"
+    lun           = "3"
+  }
+  /*DO_NO_REMOVE_THIS_COMMENT*/
 }

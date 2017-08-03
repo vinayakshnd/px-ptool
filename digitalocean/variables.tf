@@ -67,5 +67,10 @@ variable "disk2_vol_size" {
 
 variable "px_ent_uuid" {
   description = "UUID of Portworx Enterprise cluster"
-  default = '00000000-0000-0000-0000-000000000000'
+  default = "00000000-0000-0000-0000-000000000000"
+}
+
+variable "default_user" {
+  description = "default user to log on to VM"
+  default = "root"
 }

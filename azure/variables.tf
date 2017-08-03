@@ -11,19 +11,8 @@ variable "px_node_count" {
   description = "Number of VMs to create"
 }
 
-variable "px_disk_count" {
-  default = 1
-  description = "Number of disks to add to each VM"
-}
-
-variable "px_disk_size" {
-  default = 10
-  description = "Size of mounted disks in GB"
-}
-
 variable "azure_subscription_id" {
   description = "Azure subscription ID"
-
 }
 
 variable "azure_client_id" {
@@ -71,4 +60,29 @@ variable "vm_admin_user" {
 variable "vm_admin_password" {
   description = "VM admin password"
   default = "Password1234!"
+}
+
+variable "swap_vol_size" {
+  description = "Size in GB of SWAP volume"
+  default = 8
+}
+
+variable "docker_vol_size" {
+  description = "Size in GB of Docker volume"
+  default = 64
+}
+
+variable "disk1_vol_size" {
+  description = "Size in GB of disk1 volume"
+  default = 128
+}
+
+variable "disk2_vol_size" {
+  description = "Size in GB of disk1 volume"
+  default = 64
+}
+
+variable "px_ent_uuid" {
+  description = "UUID of Portworx Enterprise cluster"
+  default = "00000000-0000-0000-0000-000000000000"
 }

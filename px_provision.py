@@ -2,6 +2,7 @@ import argparse
 import os
 import subprocess
 import uuid
+import shutil
 from jinja2 import Template
 from do_functions import do_api_action
 
@@ -72,6 +73,8 @@ def gen_tfvars(myargs):
                 f.write('vm_image_version = "{}"\n'.format(a_ver))
             else:
                 f.write('px_image = "{}"\n'.format(myargs.image))
+                if myargs.image == 'coreos-stable':
+                    f.write('default_user = "core"\n')
         if myargs.size is not None:
             f.write('px_vm_size = "{}"\n'.format(myargs.size))
         if myargs.nodes > 0:
@@ -152,7 +155,30 @@ resource "google_compute_disk" "gcp-xdisk{{ idx }}-pd" {
             for d in dlist:
                 if d != '':
                     xtradisk.write(gcp_disk_tpl.render(disk_size=d, idx=mycount))
-                    mycount +=1
+                    mycount += 1
+    if mycloud == 'azure':
+        shutil.copy2('azure/instances.tf.tpl', 'azure/instances.tf')
+        azure_disk_tpl = Template("""
+  storage_data_disk {
+    name          = "azure-${var.user_prefix}-xdisk-${count.index + 1}"
+    vhd_uri       = "${azurerm_storage_account.astgacc.primary_blob_endpoint}${azurerm_storage_container.astgctnr.name}/azure-${var.user_prefix}-xdisk-${count.index + 1}"
+    disk_size_gb  = "{{ disk_size }}"
+    create_option = "Empty"
+    lun           = "{{ idx }}"
+  }
+        """)
+        az_disks = ''
+        for d in dlist:
+            if d != '':
+                az_disks = az_disks + azure_disk_tpl.render(disk_size=d, idx=3+mycount)
+                mycount += 1
+        print "Azure disks are \n {}".format(az_disks)
+        with open('azure/instances.tf', mode='r') as azfile:
+            az_inst = azfile.read()
+        az_inst = az_inst.replace('/*DO_NO_REMOVE_THIS_COMMENT*/', az_disks)
+        with open('azure/instances.tf', mode='w') as azfile:
+            azfile.write(az_inst)
+
 
 def tf_apply(mycloud, myprefix):
     """

@@ -1,19 +1,30 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -e
 MYUSER=$1;
 MYPASS=$2;
 PUB_IP=$(curl -s http://169.254.169.254/metadata/v1/interfaces/public/0/ipv4/address)
+# PUB IP on GCP : curl -H "Metadata-Flavor: Google" "http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/ip"
 MY_UUID=$3;
 # Generate UUID using cat /proc/sys/kernel/random/uuid
 
+OS_NAME=$(grep "^ID=" /etc/os-release | cut -d"=" -f2 | tr -cd '[:alnum:]')
+if [[ "${OS_NAME}" == "ubuntu" ]]; then
+   SSH_SVC=ssh
+else
+   SSH_SVC=sshd
+fi
+
+if [[ "${OS_NAME}" != "coreos" ]]; then
 #
 # Enable password based login
 #
 sed -i "s|PasswordAuthentication .*|PasswordAuthentication yes|g" /etc/ssh/sshd_config
-service sshd restart
+service ${SSH_SVC} restart
+
+fi
 #
 # Add admuser
-useradd -p $(openssl passwd -1 ${MYPASS}) ${MYUSER}
+sudo useradd -p $(openssl passwd -1 ${MYPASS}) ${MYUSER}
 
 #
 # Add user to sudoers
@@ -25,7 +36,11 @@ echo "${MYUSER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 #
 # Install docker
 curl -fsSL https://get.docker.com/ | sh
-service docker start
+if [[ "${OS_NAME}" == "ubuntu" ]]; then
+    sudo mount --make-shared /
+else
+    service docker start
+fi
 
 #
 # Find interface which binds to external IP
