@@ -8,7 +8,7 @@ resource "digitalocean_droplet" "px-node-droplet"{
   ssh_keys = ["${var.public_key_fp}"]
   connection {
     type = "ssh"
-    user = "root"
+    user = "${var.default_user}"
     private_key = "${file("${var.private_key_file}")}"
     timeout = "5m"
     agent = false

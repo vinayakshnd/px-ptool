@@ -5,6 +5,7 @@ import uuid
 import shutil
 from jinja2 import Template
 from do_functions import do_api_action
+from azure_functions import gen_azure_json
 
 
 def get_args():
@@ -17,7 +18,7 @@ def get_args():
                         help='Action to be taken on cloud')
     parser.add_argument('cloud', choices=['digitalocean', 'gcp', 'azure'], action='store',
                         help='The cloud on which to perform action')
-    parser.add_argument('--vm_creds', default='admuser|s3cret', action='store',
+    parser.add_argument('--vm_creds', action='store',
                         help='Username and password for the VMs separated by |')
     parser.add_argument('--region', action='store',
                         help='Region in which cloud resources will be created. Defaults to value in cloud specific variables.tf')
@@ -197,6 +198,8 @@ def tf_apply(mycloud, myprefix):
     if mycloud == 'digitalocean':
         # Call do_api_action function
         do_api_action('attach', myprefix)
+    if mycloud == 'azure':
+        gen_azure_json(myprefix)
 
 
 def tf_destroy(mycloud, myprefix):

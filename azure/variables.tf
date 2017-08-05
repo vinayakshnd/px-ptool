@@ -29,7 +29,7 @@ variable "azure_tenant_id" {
 
 variable "px_vm_size" {
   description = "Size of Azure VM"
-  default = "Standard_A0"
+  default = "Standard_A2_v2"
 }
 
 variable "vm_image_publisher" {
@@ -54,12 +54,12 @@ variable "vm_image_version" {
 
 variable "vm_admin_user" {
   description = "VM admin user"
-  default = "admin"
+  default = "admuser"
 }
 
 variable "vm_admin_password" {
   description = "VM admin password"
-  default = "Password1234!"
+  default = "S3cret"
 }
 
 variable "swap_vol_size" {

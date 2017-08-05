@@ -18,7 +18,7 @@ def install_px(pubip, usr, passwd):
     outlist = stdout.readlines()
     errlist = stderr.readlines()
     cmdout = ''
-    #print "INFO : stdout {} stderr {}".format(outlist[0], errlist)
+    print "INFO : stdout {} stderr {}".format(outlist, errlist)
     for n in range(10):
         time.sleep(70)
         cmdout = px_healthcheck(pubip, usr, passwd)

@@ -55,6 +55,24 @@ resource "azurerm_virtual_machine" "avm" {
   tags {
     environment = "${var.user_prefix}"
   }
+  connection {
+      type     = "ssh"
+      host     = "${element(azurerm_public_ip.apubip.*.ip_address, count.index)}"
+      user     = "${var.vm_admin_user}"
+      password = "${var.vm_admin_password}"
+  }
+
+  provisioner "file" {
+  source      = "scripts/post_install.sh"
+  destination = "/tmp/post_install.sh"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /tmp/post_install.sh",
+      "/tmp/post_install.sh ${var.px_ent_uuid}"
+    ]
+  }
 
   storage_data_disk {
     name          = "dd-${var.user_prefix}-swap-${count.index + 1}"

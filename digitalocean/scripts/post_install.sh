@@ -36,7 +36,7 @@ echo "${MYUSER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 #
 # Install docker
-curl -fsSL https://get.docker.com/ | sh
+curl -fsSL https://get.docker.com/ | sudo sh
 if [[ "${OS_NAME}" == "ubuntu" ]]; then
     sudo mount --make-shared /
 else

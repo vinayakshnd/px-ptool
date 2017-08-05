@@ -18,7 +18,7 @@ resource "azurerm_public_ip" "apubip" {
   name                         = "px-azure-${var.user_prefix}-pub-ip-${count.index}"
   location                     = "${var.px_region}"
   resource_group_name          = "${azurerm_resource_group.rg.name}"
-  public_ip_address_allocation = "dynamic"
+  public_ip_address_allocation = "static"
 }
 
 
