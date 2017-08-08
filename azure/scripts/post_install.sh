@@ -3,6 +3,12 @@ set -e
 
 MY_UUID=$1;
 OS_NAME=$(grep "^ID=" /etc/os-release | cut -d"=" -f2 | tr -cd '[:alnum:]')
+
+if [[ "${OS_NAME}" == "centos" ]]; then
+    echo "${USER} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
+    echo "Defaults:${USER}" '!requiretty' | sudo tee -a /etc/sudoers
+fi
+
 PRIV_IP=$(curl -H Metadata:true "http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0/privateIpAddress?api-version=2017-04-02&format=text")
 NET_INTF=$(ip a | grep ${PRIV_IP} | awk '{print $NF}')
 #

@@ -30,16 +30,27 @@ sudo useradd -p $(openssl passwd -1 ${MYPASS}) ${MYUSER}
 #
 # Add user to sudoers
 #usermod -aG sudo ${MYUSER}
-
-echo "Defaults:${MYUSER} !requiretty" >> /etc/sudoers
-echo "${MYUSER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-
+if [[ "${OS_NAME}" == "coreos" ]]; then
+    sudo mkdir -p /etc/sudoers.d;
+    echo "${MYUSER} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers.d/${MYUSER}
+    echo "Defaults:${MYUSER} " '!requiretty' | sudo tee -a /etc/sudoers.d/${MYUSER}
+    #
+    # CoreOS ships with latest compatible docker so no need to mess around.
+else
+    echo "Defaults:${MYUSER} " '!requiretty' >> /etc/sudoers
+    echo "${MYUSER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 #
 # Install docker
-curl -fsSL https://get.docker.com/ | sudo sh
+    curl -fsSL https://get.docker.com/ | sudo sh
+
+fi
+
+
 if [[ "${OS_NAME}" == "ubuntu" ]]; then
     sudo mount --make-shared /
-else
+fi
+
+if [[ "${OS_NAME}" == "centos" ]]; then
     service docker start
 fi
 
@@ -49,6 +60,25 @@ NET_INTF=$(ip a | grep ${PUB_IP} | awk '{print $NF}')
 
 #
 # Install PX-Enterprise
+
+if [[ "${OS_NAME}" == "coreos" ]]; then
+cat<<EOF >/tmp/install_px.sh
+sudo docker run --restart=always --name px -d --net=host     \
+                 --privileged=true                             \
+                 -v /run/docker/plugins:/run/docker/plugins    \
+                 -v /var/lib/osd:/var/lib/osd:shared           \
+                 -v /dev:/dev                                  \
+                 -v /etc/pwx:/etc/pwx                          \
+                 -v /opt/pwx/bin:/export_bin:shared            \
+                 -v /var/run/docker.sock:/var/run/docker.sock  \
+                 -v /var/cores:/var/cores                      \
+                 -v /lib/modules:/lib/modules                  \
+                portworx/px-enterprise:1.2.9 -daemon \
+                -c ${MY_UUID} -k etcd://etcd-us-east-1b.portworx.com:4001,etcd://etcd-us-east-1c.portworx.com:4001,etcd://etcd-us-east-1d.portworx.com:4001 \
+                -a -m ${NET_INTF} -d ${NET_INTF}
+EOF
+
+else
 cat<<EOF >/tmp/install_px.sh
 docker run --name px-enterprise -d --net=host --privileged=true --restart=always -v /mnt:/mnt:shared \
 -v /var/cores:/var/cores -v /run/docker/plugins:/run/docker/plugins -v /lib/modules:/lib/modules \
@@ -58,4 +88,5 @@ portworx/px-enterprise:1.2.9 \
 -k etcd://etcd-us-east-1b.portworx.com:4001,etcd://etcd-us-east-1c.portworx.com:4001,etcd://etcd-us-east-1d.portworx.com:4001 \
 -a -m ${NET_INTF} -d ${NET_INTF} -c ${MY_UUID}
 EOF
+fi
 chmod 755 /tmp/install_px.sh
