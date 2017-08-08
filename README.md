@@ -1,11 +1,12 @@
-# Provisioning container for multiple clouds
+# Portworx Provisioning container for multiple clouds
 
 This container can be used for following:
 
-*  Specify Cloud, VM and Disk specific parameters as flags to `px_provision.sh`
+*  Specify Cloud, VM and Disk specific parameters as flags to `px_provision.py`
 *  Spawn instances and disks per specifications mentioned above
 *  Mount required disks on their corresponding nodes.
 *  Generate an output JSON file with node details.
+*  Install portworx Enterprise on nodes created above, check installation status and report in case of errors.
 
 ## Pre-requisites
 
@@ -20,11 +21,11 @@ This container can be used for following:
 
 ## Usage
 
-`docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:1.4 <SUB COMMAND>`
+`docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:v10 python <SUB COMMAND>`
 
 ### Sub Command Explanation:
 
-`px_provision.sh` is the main script.
+`px_provision.py` is the main script.
 This script takes two positional parameters:
 
 1.  Action (apply, destroy or reset)
@@ -46,7 +47,6 @@ Following are additional flags which are to be provided in case of `apply` or `r
 
 `--user_prefix` : Unique identifier for user's resources
 
-**Azure Only**
 `--vm_creds`    : '|' separated username and password to be used on azure nodes.
 
 Reset does a destroy followed by apply.
@@ -54,7 +54,7 @@ Reset does a destroy followed by apply.
 ### Example : To create VMs and Disks on azure
 
 ~~~
-docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:1.4 ./px_provision.sh apply azure \
+docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:v10 python px_provision.py apply azure \
 --vm_creds 'nodeadm|s3cretP@ss' \
 --region 'West Europe' \
 --image 'Canonical|UbuntuServer|14.04.2-LTS|latest' \
@@ -68,7 +68,7 @@ docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:1.4 ./px_pro
 ### Example : To create VMs and Disks on GCP
 
 ~~~
-docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:1.3 ./px_provision.sh apply gcp \
+docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:v10 python px_provision.py apply gcp \
 --region 'us-central1|us-central1-a' \
 --image 'ubuntu-os-cloud/ubuntu-1604-xenial-v20170330' \
 --size 'n1-standard-1' \
@@ -81,7 +81,7 @@ docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:1.3 ./px_pro
 ### Example : To create VMs and Disks on DigitalOcean
 
 ~~~
-docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:1.3 ./px_provision.sh apply digitalocean \
+docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:v10 python px_provision.py apply digitalocean \
 --region 'sfo2' \
 --image 'centos-7-x64' \
 --size '2gb' \
@@ -94,13 +94,13 @@ docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:1.3 ./px_pro
 ### Example : TO destroy VMs and Disks
 
 *  On Azure:
-`px_provision.sh azure destroy --user_prefix 'deangelo'`
+`python px_provision.py azure destroy --user_prefix 'deangelo'`
 
 *  On DigitalOcean:
-`px_provision.sh digitalocean destroy --user_prefix 'savino'`
+`python px_provision.py digitalocean destroy --user_prefix 'savino'`
 
 *  On Google Cloud:
-`px_provision.sh gcp destroy --user_prefix 'weebey'`
+`python px_provision.py gcp destroy --user_prefix 'weebey'`
 
 
 **Note for GCP** A service account must be created and the json file from this service account should be copied to gcp/credentials directory.
