@@ -97,8 +97,9 @@ def do_api_action(action, user_prefix):
                 payload = {"type": action, "droplet_id": drop_dict[droplet], "region": do_region}
                 post_header = {'Content-Type': 'application/json', 'Authorization': 'Bearer {}'.format(do_token)}
                 resp = requests.post(do_url, headers=post_header, params=payload)
+                print "INFO : Status for {}ing volume {} to {} is {}".format(action, vol, droplet, resp.status_code)
                 time.sleep(2)
     if action == 'attach':
         do_output_json(drop_objs, user_prefix)
 if __name__ == '__main__':
-    do_api_action('attach', 'bronn25')
+    do_api_action('attach', 'gendry')

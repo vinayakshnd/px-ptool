@@ -49,11 +49,7 @@ resource "azurerm_virtual_machine" "avm" {
   }
 
   os_profile_linux_config {
-      disable_password_authentication = true
-      ssh_keys = [{
-        path     = "/home/${var.vm_admin_user}/.ssh/authorized_keys"
-        key_data = "${var.admin_pubkey_data}"
-      }]
+      disable_password_authentication = false
   }
 
   tags {
@@ -63,7 +59,7 @@ resource "azurerm_virtual_machine" "avm" {
         host = "${element(azurerm_public_ip.apubip.*.ip_address, count.index)}"
         user = "${var.vm_admin_user}"
         type = "ssh"
-        private_key = "${file("~/.ssh/id_rsa")}"
+        password = "${var.vm_admin_password}"
         timeout = "1m"
         //agent = true
     }
@@ -76,7 +72,7 @@ resource "azurerm_virtual_machine" "avm" {
   provisioner "remote-exec" {
     inline = [
       "chmod +x /tmp/post_install.sh",
-      "/tmp/post_install.sh ${var.px_ent_uuid}"
+      "/tmp/post_install.sh ${var.px_ent_uuid} ${var.vm_admin_password}"
     ]
   }
 

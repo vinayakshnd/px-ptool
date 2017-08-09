@@ -86,8 +86,3 @@ variable "px_ent_uuid" {
   description = "UUID of Portworx Enterprise cluster"
   default = "00000000-0000-0000-0000-000000000000"
 }
-
-variable "admin_pubkey_data" {
-  description = "Content of public key for admin user"
-  default = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKCI+pMSCqj38yXNXjRKbhjD8RyXnO8HD2EI7yLJLKQ70Emt0BuVeef7Or9XHdwh7RkUBH+1NqbAW7d3So7FK3nAU9NxMfCMNtIDoNV2Y/yI32ipcWsXHqA+LOWUkqIKwOfL2aoCsXfAzxDFIdt+rVgHu9FYUmpSPcaqaUxuFMATHEVc3fQSraWiofO59v6Ha9nXNW691OWABiglIOfsOQ1P+rwZUHMhbIdhHL9jae7VapYhwVXNgytYTGG403c0nJ3Msh4GwH+2oI8L4Ls4usfX/6hXgiBIOkfqwYeoYDlI07chXeDoHzvMjsZZ645sXT6Esv5mLuC7GMU1qChW1X infracloud@VISHAL-B"
-}
