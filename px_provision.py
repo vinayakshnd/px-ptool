@@ -58,12 +58,15 @@ def gen_tfvars(myargs):
             f.write('vm_admin_password = "{}"\n'.format(vm_admin_password))
         # Populating region if passed
         if myargs.region is not None:
+            if myargs.cloud == 'azure' and '_' in myargs.region:
+                myargs.region = myargs.region.replace('_', ' ')
             if myargs.cloud == 'gcp':
-                gcp_region, gcp_region_zone = myargs.cloud.split('|')
+                gcp_region, gcp_region_zone = myargs.region.split('|')
                 f.write('px_region = "{}"\n'.format(gcp_region))
                 f.write('px_region_zone = "{}"\n'.format(gcp_region_zone))
             else:
                 f.write('px_region = "{}"\n'.format(myargs.region))
+
         # Populating image details if passed
         if myargs.image is not None:
             if myargs.cloud == 'azure':
