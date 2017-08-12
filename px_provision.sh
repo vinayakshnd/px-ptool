@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -e
-#set -x
+# set -x
 
-SUPPORTED_CLOUDS="digitalocean gcp azure"
+SUPPORTED_CLOUDS="digitalocean gcp azure aws"
 
 show_usage() {
 
-echo "Usage : $0 [apply|destroy|reset] [gcp|azure|digitalocean] [additional flags]";
+echo "Usage : $0 [apply|destroy|reset|pxify] [gcp|azure|digitalocean|aws] [additional flags]";
 echo "Additional Flags:";
 echo "--vm_creds    : | delimited string with public and private key for gcp and digitalocean, username and password for azure";
 echo "--region      : region in which the VMs and disks should be created";
@@ -15,7 +15,13 @@ echo "--size        : Size of VMs to be created";
 echo "--nodes       : Number of VMs to be created";
 echo "--disks       : Number of disks per node";
 echo "--disk_size   : Size of each disk in GB";
-echo "--user_prefix : Unique identifier for user's resources"
+echo "--user_prefix : Unique identifier for user's resources";
+echo "";
+echo "Additional Flags for 'pxify':";
+echo "--aws_access_key_id       :  AWS_ACCESS_KEY_ID";
+echo "--aws_secret_access_key   :  AWS_SECRET_ACCESS_KEY";
+echo "--aws_cluster             :  AWS_CLUSTER";
+
 
 exit 1;
 }
@@ -191,7 +197,7 @@ check_tf;
 scriptLoc=$PWD;
 action=$1;
 shift;
-if [[ "$action" != "apply" && "$action" != "destroy" && "$action" != "reset" ]]; then
+if [[ "$action" != "apply" && "$action" != "destroy" && "$action" != "reset" && "$action" != "pxify" ]]; then
      echo "ERROR : Action $action is not supported";
      show_usage
 fi
@@ -205,13 +211,25 @@ if [[ $supported -ne 0 ]]; then
     echo "ERROR : Cloud $cloud is not supported";
     show_usage
 fi
-if [[ "$action" == "apply" || "$action" == "reset" ]]; then
+if [[ "$action" == "apply" || "$action" == "reset" || "$action" == "pxify" ]]; then
 
     while [ "$1" != "" ];
     do
         case $1 in
             --auth )
                 auth=$2;
+                shift;
+                shift;;
+            --aws_access_key_id )
+                aws_access_key_id=$2
+                shift;
+                shift;;
+            --aws_secret_access_key )
+                aws_secret_access_key=$2
+                shift;
+                shift;;
+            --aws_cluster )
+                aws_cluster=$2
                 shift;
                 shift;;
             --vm_creds )
@@ -254,6 +272,30 @@ if [[ "$action" == "apply" || "$action" == "reset" ]]; then
     if [[ "$action" == "reset" ]]; then
         destroy;
     fi
+
+    if [[ "$action" == "pxify" ]]; then
+       if [[ -z "${aws_access_key_id}" || -z "${aws_secret_access_key}" || -z "${disk_size}" || -z "${region}" || -z "${aws_cluster}" || -z "${disks}" ]]; then
+          echo "ERROR:  'pxify aws' requires --aws_access_key_id, --aws_secret_access_key, --disks, --disk_size, --region, --aws_cluster"
+          exit -1
+       fi
+       export AWS_ACCESS_KEY_ID="$aws_access_key_id"
+       export AWS_SECRET_ACCESS_KEY="$aws_secret_access_key"
+       export AWS_VOL_TYPE="gp2"
+       export AWS_VOL_SIZE="$disk_size"
+       export AWS_DEFAULT_REGION="$region"
+       export AWS_CLUSTER="$aws_cluster"
+       declare -a A
+       A=(`echo {d..z}`)
+       BASE="/dev/xvd"
+       export AWS_VOL_NAMES=""
+       for i in `seq 0 $disks`
+       do
+            AWS_VOL_NAMES="$AWS_VOL_NAMES ${BASE}${A[$i]}"
+       done
+       python3.6 aws/scripts/rpx.py 
+       exit $?
+    fi
+ 
 
     gen_tfvars;
     if [[ "${cloud}" == "azure" ]]; then

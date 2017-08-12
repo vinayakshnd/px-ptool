@@ -1,4 +1,5 @@
 FROM python:2.7
+FROM python:3.6
 
 RUN mkdir -p /root/px_prov && cd /root/px_prov
 ADD https://releases.hashicorp.com/terraform/0.9.11/terraform_0.9.11_linux_amd64.zip /usr/bin
