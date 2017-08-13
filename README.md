@@ -27,7 +27,7 @@ This container can be used for following:
 `px_provision.sh` is the main script.
 This script takes two positional parameters:
 
-1.  Action (apply, destroy or reset)
+1.  Action (apply, destroy, reset, or pxify)
 2.  Cloud Name (digitalocean or gcp or azure)
 
 Following are additional flags which are to be provided in case of `apply` or `reset`
@@ -50,6 +50,9 @@ Following are additional flags which are to be provided in case of `apply` or `r
 `--vm_creds`    : '|' separated username and password to be used on azure nodes.
 
 Reset does a destroy followed by apply.
+
+**AWS Only**
+Pxify takes an existing Tectonic cluster deployed on AWS, and makes it ready for Portworx to deploy.
 
 ### Example : To create VMs and Disks on azure
 
@@ -104,3 +107,19 @@ docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:1.3 ./px_pro
 
 
 **Note for GCP** A service account must be created and the json file from this service account should be copied to gcp/credentials directory.
+
+### Example:  Post-processing for a Tectonic cluster, to be ready for Portworx to deploy
+
+* Only on AWS
+
+To take a cluster that has been successfully deployed through Tectonic, 
+and then add 3 100GB disks to each worker node:
+
+```
+px_provision.sh pxify aws --aws_access_key_id $AWS_ACCESS_KEY_ID         \
+                          --aws_secret_access_key $AWS_SECRET_ACCESS_KEY \
+                          --disks 3 --disk_size 100                      \
+                          --region $AWS_DEFAULT_REGION                   \
+                          --aws_cluster $AWS_CLUSTER
+```
+
