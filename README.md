@@ -122,4 +122,4 @@ px_provision.sh pxify aws --aws_access_key_id $AWS_ACCESS_KEY_ID         \
                           --region $AWS_DEFAULT_REGION                   \
                           --aws_cluster $AWS_CLUSTER
 ```
-
+where $AWS_CLUSTER corresponds to the Tectonic $CLUSTER variable, which gets used as the basename for the AWS auto-scaling groups, (i.e. "$CLUSTER-master" and "$CLUSTER-worker")
