@@ -2,6 +2,7 @@ import json
 import sys
 import subprocess
 import paramiko
+import os
 from px_functions import install_px
 
 #
@@ -18,8 +19,11 @@ def gen_azure_json(user_prefix):
     :return: None
     """
     CURL_PRIVATE_IP='curl -H Metadata:true "http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0/privateIpAddress?api-version=2017-04-02&format=text"'
+    scriptLoc = os.getcwd()
+    os.chdir('{}/azure'.format(scriptLoc))
     tf_out = json.loads(subprocess.check_output('terraform output -no-color -json -state output/azure_{}.tfstate'
                                                 .format(user_prefix)))
+    os.chdir(scriptLoc)
     pub_ip_list = tf_out['public_ips']['value']
     admuser = tf_out['admuser']['value']
     admpass = tf_out['admpassword']['value']
