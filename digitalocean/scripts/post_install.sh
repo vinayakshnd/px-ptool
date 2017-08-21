@@ -5,6 +5,7 @@ MYPASS=$2;
 PUB_IP=$(curl -s http://169.254.169.254/metadata/v1/interfaces/public/0/ipv4/address)
 # PUB IP on GCP : curl -H "Metadata-Flavor: Google" "http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/ip"
 MY_UUID=$3;
+PX_IMAGE=$4;
 # Generate UUID using cat /proc/sys/kernel/random/uuid
 
 OS_NAME=$(grep "^ID=" /etc/os-release | cut -d"=" -f2 | tr -cd '[:alnum:]')
@@ -73,7 +74,7 @@ sudo docker run --restart=always --name px -d --net=host     \
                  -v /var/run/docker.sock:/var/run/docker.sock  \
                  -v /var/cores:/var/cores                      \
                  -v /lib/modules:/lib/modules                  \
-                portworx/px-enterprise:1.2.9 -daemon \
+                ${PX_IMAGE} -daemon \
                 -c ${MY_UUID} -k etcd://etcd-us-east-1b.portworx.com:4001,etcd://etcd-us-east-1c.portworx.com:4001,etcd://etcd-us-east-1d.portworx.com:4001 \
                 -a -m ${NET_INTF} -d ${NET_INTF}
 EOF
@@ -84,7 +85,7 @@ docker run --name px-enterprise -d --net=host --privileged=true --restart=always
 -v /var/cores:/var/cores -v /run/docker/plugins:/run/docker/plugins -v /lib/modules:/lib/modules \
 -v /var/lib/osd:/var/lib/osd:shared -v /dev:/dev -v /usr/src:/usr/src -v /etc/pwx:/etc/pwx \
 -v /opt/pwx/bin:/export_bin:shared -v /var/run/docker.sock:/var/run/docker.sock \
-portworx/px-enterprise:1.2.9 \
+${PX_IMAGE} \
 -k etcd://etcd-us-east-1b.portworx.com:4001,etcd://etcd-us-east-1c.portworx.com:4001,etcd://etcd-us-east-1d.portworx.com:4001 \
 -a -m ${NET_INTF} -d ${NET_INTF} -c ${MY_UUID}
 EOF

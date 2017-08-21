@@ -11,7 +11,7 @@ from px_functions import install_px
 # 2. Run PX installation script and check health of px installation
 
 
-def gen_azure_json(user_prefix):
+def gen_azure_json(user_prefix, inst_px):
     """
     Function to generate output json as well as install portworx on each VM created with prefix defined by user_prefix
     :param user_prefix: string
@@ -46,12 +46,13 @@ def gen_azure_json(user_prefix):
                         "DockerDisk": docker_disk,
                         "Disks": other_disks}
         json_out.append(drop_details)
-        px_installed, px_msg = install_px(public_ip, admuser, admpass)
-        if px_installed:
-            print "INFO : Portworx installed successfully on {}".format(public_ip)
-        else:
-            print "ERROR : Portworx installation failed on {} with following error message: {}". \
-                format(public_ip, px_msg)
+        if inst_px is True:
+            px_installed, px_msg = install_px(public_ip, admuser, admpass)
+            if px_installed:
+                print "INFO : Portworx installed successfully on {}".format(public_ip)
+            else:
+                print "ERROR : Portworx installation failed on {} with following error message: {}". \
+                    format(public_ip, px_msg)
     with open('output/azure_{}_output.json'.format(user_prefix), mode='w') as outfile:
         outfile.write(json.dumps(json_out, indent=4))
     print "========================================================"
@@ -60,4 +61,4 @@ def gen_azure_json(user_prefix):
 
 
 if __name__ == '__main__':
-    gen_azure_json(sys.argv[1])
+    gen_azure_json(sys.argv[1], True)

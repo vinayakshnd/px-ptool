@@ -72,7 +72,7 @@ resource "azurerm_virtual_machine" "avm" {
   provisioner "remote-exec" {
     inline = [
       "chmod +x /tmp/post_install.sh",
-      "/tmp/post_install.sh ${var.px_ent_uuid} ${var.vm_admin_password}"
+      "/tmp/post_install.sh ${var.px_ent_uuid} ${var.vm_admin_password} ${var.docker_image}"
     ]
   }
 

@@ -22,10 +22,11 @@ def get_tf_out(user_prefix, prop):
     return prop
 
 
-def do_output_json(drop_objs, user_prefix):
+def do_output_json(drop_objs, user_prefix, inst_px):
     json_out = []
     private_ip = ''
     public_ip = ''
+    print "HARSHAL : Value of inst_px is {}".format(inst_px)
     adm_user = get_tf_out(user_prefix, 'vm_admin_user')
     adm_pass = get_tf_out(user_prefix, 'vm_admin_password')
     for d in drop_objs:
@@ -56,12 +57,13 @@ def do_output_json(drop_objs, user_prefix):
                                 "DockerDisk": docker_disk,
                                 "Disks": other_disks}
                 json_out.append(drop_details)
-                px_installed, px_msg = install_px(public_ip, adm_user, adm_pass)
-                if px_installed:
-                    print "INFO : Portworx installed successfully on {}".format(public_ip)
-                else:
-                    print "ERROR : Portworx installation failed on {} with following error message: {}".\
-                        format(public_ip, px_msg)
+                if inst_px is True:
+                    px_installed, px_msg = install_px(public_ip, adm_user, adm_pass)
+                    if px_installed:
+                        print "INFO : Portworx installed successfully on {}".format(public_ip)
+                    else:
+                        print "ERROR : Portworx installation failed on {} with following error message: {}".\
+                            format(public_ip, px_msg)
 
     with open('output/digitalocean_{}_output.json'.format(user_prefix), mode='w') as outfile:
         outfile.write(json.dumps(json_out, indent=4))
@@ -70,7 +72,7 @@ def do_output_json(drop_objs, user_prefix):
     print "========================================================"
 
 
-def do_api_action(action, user_prefix):
+def do_api_action(action, user_prefix, inst_px):
     do_token = get_tf_out(user_prefix, 'do_token')
     do_region = get_tf_out(user_prefix, 'do_region')
     auth_header = {'Authorization': 'Bearer {}'.format(do_token)}
@@ -100,6 +102,6 @@ def do_api_action(action, user_prefix):
                 print "INFO : Status for {}ing volume {} to {} is {}".format(action, vol, droplet, resp.status_code)
                 time.sleep(2)
     if action == 'attach':
-        do_output_json(drop_objs, user_prefix)
+        do_output_json(drop_objs, user_prefix, inst_px)
 if __name__ == '__main__':
-    do_api_action('attach', 'gendry')
+    do_api_action('attach', 'gendry', True)

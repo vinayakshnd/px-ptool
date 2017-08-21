@@ -22,7 +22,7 @@ resource "digitalocean_droplet" "px-node-droplet"{
   provisioner "remote-exec" {
     inline = [
       "chmod +x /tmp/post_install.sh",
-      "/tmp/post_install.sh ${var.vm_admin_user} ${var.vm_admin_password} ${var.px_ent_uuid}"
+      "/tmp/post_install.sh ${var.vm_admin_user} ${var.vm_admin_password} ${var.px_ent_uuid} ${var.docker_image}"
     ]
   }
 }

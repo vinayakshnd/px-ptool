@@ -86,3 +86,8 @@ variable "px_ent_uuid" {
   description = "UUID of Portworx Enterprise cluster"
   default = "00000000-0000-0000-0000-000000000000"
 }
+
+variable "docker_image"{
+  description = "Image of Portworx installation to be used"
+  default = "portworx/px-enterprise:1.2.9"
+}

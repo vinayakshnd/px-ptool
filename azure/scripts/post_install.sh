@@ -3,6 +3,7 @@ set -e
 
 MY_UUID=$1;
 MY_PASSWD=$2;
+PX_IMAGE=$3;
 OS_NAME=$(grep "^ID=" /etc/os-release | cut -d"=" -f2 | tr -cd '[:alnum:]')
 
 # Below is a dirty little hack to allow passwordless sudo using password
@@ -61,7 +62,7 @@ sudo docker run --restart=always --name px -d --net=host     \
                  -v /var/run/docker.sock:/var/run/docker.sock  \
                  -v /var/cores:/var/cores                      \
                  -v /lib/modules:/lib/modules                  \
-                portworx/px-enterprise:1.2.9 -daemon \
+                ${PX_IMAGE} -daemon \
                 -c ${MY_UUID} -k etcd://etcd-us-east-1b.portworx.com:4001,etcd://etcd-us-east-1c.portworx.com:4001,etcd://etcd-us-east-1d.portworx.com:4001 \
                 -a -m ${NET_INTF} -d ${NET_INTF}
 EOF
@@ -73,7 +74,7 @@ sudo docker run --name px-enterprise -d --net=host --privileged=true --restart=a
 -v /var/cores:/var/cores -v /run/docker/plugins:/run/docker/plugins -v /lib/modules:/lib/modules \
 -v /var/lib/osd:/var/lib/osd:shared -v /dev:/dev -v /usr/src:/usr/src -v /etc/pwx:/etc/pwx \
 -v /opt/pwx/bin:/export_bin:shared -v /var/run/docker.sock:/var/run/docker.sock \
-portworx/px-enterprise:1.2.9 \
+${PX_IMAGE} \
 -k etcd://etcd-us-east-1b.portworx.com:4001,etcd://etcd-us-east-1c.portworx.com:4001,etcd://etcd-us-east-1d.portworx.com:4001 \
 -a -m ${NET_INTF} -d ${NET_INTF} -c ${MY_UUID}
 EOF

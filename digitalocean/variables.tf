@@ -74,3 +74,8 @@ variable "default_user" {
   description = "default user to log on to VM"
   default = "root"
 }
+
+variable "docker_image"{
+  description = "Image of Portworx installation to be used"
+  default = "portworx/px-enterprise:1.2.9"
+}

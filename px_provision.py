@@ -40,7 +40,10 @@ def get_args():
                         help="Size in GB of Disk1 volume")
     parser.add_argument('--disk2_vol_size', action='store',
                         help="Size in GB of Disk2 volume")
-
+    parser.add_argument('--install_px', default=True, action='store',
+                        help="Install Portworx or not. True/False")
+    parser.add_argument('--docker_image', action='store',
+                        help="Docker image tag for portworx")
     myargs = parser.parse_args()
     return myargs
 
@@ -103,6 +106,8 @@ def gen_tfvars(myargs):
             myprefix = ''.join([c for c in myargs.user_prefix if c.isalnum()])
             f.write('user_prefix = "{}"\n'.format(myprefix))
         f.write('px_ent_uuid = "{}"\n'.format(px_ent_uuid))
+        if myargs.docker_image is not None:
+            f.write('docker_image = "{}"'.format(myargs.docker_image))
 
 
 def gen_creds(myargs):
@@ -184,7 +189,7 @@ resource "google_compute_disk" "gcp-xdisk{{ idx }}-pd" {
             azfile.write(az_inst)
 
 
-def tf_apply(mycloud, myprefix):
+def tf_apply(mycloud, myprefix, install_px):
     """
     Function to run terraform apply
     :param mycloud: Name of cloud
@@ -200,14 +205,14 @@ def tf_apply(mycloud, myprefix):
     os.chdir(script_loc)
     if mycloud == 'digitalocean':
         # Call do_api_action function
-        do_api_action('attach', myprefix)
+        do_api_action('attach', myprefix, install_px)
     if mycloud == 'azure':
-        gen_azure_json(myprefix)
+        gen_azure_json(myprefix, install_px)
 
 
 def tf_destroy(mycloud, myprefix):
     if mycloud == 'digitalocean':
-        do_api_action('detach', myprefix)
+        do_api_action('detach', myprefix, False)
     tf_cmd = 'terraform destroy -no-color -force ' \
              '-var-file creds.tfvars ' \
              '-var-file {}/output/{}_{}_terraform.tfvars ' \
@@ -228,6 +233,6 @@ if __name__ == '__main__':
         tf_destroy(args.cloud, args.user_prefix)
     if args.action == 'apply' or args.action == 'reset':
         gen_tfvars(args)
-        tf_apply(args.cloud, args.user_prefix)
+        tf_apply(args.cloud, args.user_prefix, args.install_px)
 
 
