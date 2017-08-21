@@ -6,7 +6,8 @@ This container can be used for following:
 *  Spawn instances and disks per specifications mentioned above
 *  Mount required disks on their corresponding nodes.
 *  Generate an output JSON file with node details.
-*  Install portworx Enterprise on nodes created above, check installation status and report in case of errors.
+*  Optionally, Install portworx Enterprise on nodes created above, check installation status and report in case of errors.
+*  Install specified image of portworx container
 
 ## Pre-requisites
 
@@ -49,6 +50,9 @@ Following are additional flags which are to be provided in case of `apply` or `r
 
 `--vm_creds`    : '|' separated username and password to be used on azure nodes.
 
+`--install_px`  : Flag to decide whether to install Portworx or not. Valid Values `True` / `False` (Python Boolean). Default: `True`
+
+`--docker_version` : Docker image to install for Portworx installation. Default: `portworx/px-enterprise:1.2.9`
 Reset does a destroy followed by apply.
 
 ### Example : To create VMs and Disks on azure
