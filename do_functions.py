@@ -26,7 +26,6 @@ def do_output_json(drop_objs, user_prefix, inst_px):
     json_out = []
     private_ip = ''
     public_ip = ''
-    print "HARSHAL : Value of inst_px is {}".format(inst_px)
     adm_user = get_tf_out(user_prefix, 'vm_admin_user')
     adm_pass = get_tf_out(user_prefix, 'vm_admin_password')
     for d in drop_objs:
