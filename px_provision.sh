@@ -21,6 +21,12 @@ echo "Additional Flags for 'pxify':";
 echo "--aws_access_key_id       :  AWS_ACCESS_KEY_ID";
 echo "--aws_secret_access_key   :  AWS_SECRET_ACCESS_KEY";
 echo "--aws_cluster             :  AWS_CLUSTER";
+echo "--arm_subscription_id     :  ARM_SUBSCRIPTION_ID";
+echo "--arm_client_id           :  ARM_CLIENT_ID";
+echo "--arm_client_secret       :  ARM_CLIENT_SECRET";
+echo "--arm_tenant_id           :  ARM_TENANT_ID";
+echo "--arm_region              :  ARM_REGION";
+echo "--arm_cluster             :  ARM_CLUSTER";
 
 
 exit 1;
@@ -213,7 +219,11 @@ if [[ $supported -ne 0 ]]; then
 fi
 if [[ "$action" == "apply" || "$action" == "reset" || "$action" == "pxify" ]]; then
 
-    while [ "$1" != "" ];
+    #  Can't do this:   
+    #        while [ "$1" != "" ];
+    #  Whole script crashes if cmdline args are not in pairs. "$1" becomes undefined.
+    #  
+    while [ $# -ge 2 ];
     do
         case $1 in
             --auth )
@@ -230,6 +240,26 @@ if [[ "$action" == "apply" || "$action" == "reset" || "$action" == "pxify" ]]; t
                 shift;;
             --aws_cluster )
                 aws_cluster=$2
+                shift;
+                shift;;
+            --arm_cluster )
+                arm_cluster=$2
+                shift;
+                shift;;
+            --arm_client_id )
+                arm_client_id=$2
+                shift;
+                shift;;
+            --arm_client_secret )
+                arm_client_secret=$2
+                shift;
+                shift;;
+            --arm_subscription_id )
+                arm_subscription_id=$2
+                shift;
+                shift;;
+            --arm_tenant_id )
+                arm_tenant_id=$2
                 shift;
                 shift;;
             --vm_creds )
@@ -273,7 +303,15 @@ if [[ "$action" == "apply" || "$action" == "reset" || "$action" == "pxify" ]]; t
         destroy;
     fi
 
-    if [[ "$action" == "pxify" ]]; then
+    #
+    # Fundamental problem with the 'while' loop above :  
+    #     Assumes full pair (e.g. "--disks 3").
+    #     If only half pair is given (e.g. "--disks")
+    #     or if argument is NULL (e.g. "--aws_cluster $AWS_CLUSTER", but AWS_CLUSTER is not set),
+    #     then the shell script crashes silently and abruptly, since "$1" does not exist, due to "shift; shift"
+    #
+
+    if [[ "$action" == "pxify" && "$cloud" == "aws" ]]; then
        if [[ -z "${aws_access_key_id}" || -z "${aws_secret_access_key}" || -z "${disk_size}" || -z "${region}" || -z "${aws_cluster}" || -z "${disks}" ]]; then
           echo "ERROR:  'pxify aws' requires --aws_access_key_id, --aws_secret_access_key, --disks, --disk_size, --region, --aws_cluster"
           exit -1
@@ -293,6 +331,25 @@ if [[ "$action" == "apply" || "$action" == "reset" || "$action" == "pxify" ]]; t
             AWS_VOL_NAMES="$AWS_VOL_NAMES ${BASE}${A[$i]}"
        done
        python3.6 aws/scripts/rpx.py 
+       exit $?
+    fi
+ 
+    if [[ "$action" == "pxify" && "$cloud" == "azure" ]]; then
+       if [[ -z "${arm_client_id}" || -z "${arm_client_secret}" || \
+             -z "${arm_subscription_id}" || -z "${arm_tenant_id}" || \
+             -z "${disk_size}" || -z "${region}" || -z "${arm_cluster}" || -z "${disks}" ]]; then
+          echo "ERROR:  'pxify aws' requires --arm_client_id, --arm_client_secret, --arm_subscription_id, --arm_tenant_id, --disks, --disk_size, --region, --arm_cluster"
+          exit -1
+       fi
+       export ARM_CLIENT_ID="$arm_client_id"
+       export ARM_CLIENT_SECRET="$arm_client_secret"
+       export ARM_SUBSCRIPTION_ID="$arm_subscription_id"
+       export ARM_TENANT_ID="$arm_tenant_id"
+       export ARM_REGION="$region"
+       export ARM_VOL_SIZE="$disk_size"
+       export ARM_NUM_VOLS="$disks"
+       export CLUSTER="$arm_cluster"
+       python3.6 azure/scripts/rpx_az.py 
        exit $?
     fi
  

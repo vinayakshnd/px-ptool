@@ -33,9 +33,9 @@ envars = [ "AWS_SECRET_ACCESS_KEY", "AWS_ACCESS_KEY_ID", "AWS_DEFAULT_REGION",
 
 
 def check_prereqs():
-
     for e in envars:
-       if not os.getenv(e):
+       #  if not os.getenv(e): 
+       if not e in os.environ:
            print ("FATAL: {} is not defined".format(e))
            sys.exit(-1)
 
