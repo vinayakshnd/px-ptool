@@ -3,7 +3,7 @@
 This container can be used for following:
 
 *  Specify Cloud, VM and Disk specific parameters as flags to `px_provision.py`
-*  Spawn instances and disks per specifications mentioned above
+*  Spawn instances and disks per specifications mentioned above. Default config for every VM is, 1 Docker Disk, 1 SWAP Disk, 2 Disks called Disk1 and Disk2 respectively.
 *  Mount required disks on their corresponding nodes.
 *  Generate an output JSON file with node details.
 *  Optionally, Install portworx Enterprise on nodes created above, check installation status and report in case of errors.
@@ -42,13 +42,19 @@ Following are additional flags which are to be provided in case of `apply` or `r
 
 `--nodes`       : Number of VMs to be created
 
-`--disks`       : Number of disks per node
-
-`--disk_size`   : Size of each disk in GB
+`--disks`       : Default : None. Comma separated list of Extra Disks to be created. If 3 additional disks of sizes 10,20 and 15 GB are needed, pass the param as '10,20,15' This will create xdisk1 xdisk2 and xdisk3.
 
 `--user_prefix` : Unique identifier for user's resources
 
 `--vm_creds`    : '|' separated username and password to be used on azure nodes.
+
+`--swap_vol_size` : Size of SWAP volume on the VMs
+
+`--docker_vol_size` : Size of Docker volume on the VM
+
+`--disk1_vol_size`  : Size of Disk1 on the VM
+
+`--disk2_vol_size`  : Size of Disk2 on the VM
 
 `--install_px`  : Flag to decide whether to install Portworx or not. Valid Values `True` / `False` (Python Boolean). Default: `True`
 
