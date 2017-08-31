@@ -108,9 +108,7 @@ docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:1.3 ./px_pro
 
 **Note for GCP** A service account must be created and the json file from this service account should be copied to gcp/credentials directory.
 
-### Example:  Post-processing for a Tectonic cluster, to be ready for Portworx to deploy
-
-* On AWS
+### Example:  Post-processing for an AWS Tectonic cluster, to be ready for Portworx to deploy
 
 To take a cluster that has been successfully deployed through Tectonic, 
 and then add 3 100GB disks to each worker node:
@@ -124,7 +122,7 @@ px_provision.sh pxify aws --aws_access_key_id $AWS_ACCESS_KEY_ID         \
 ```
 where $AWS_CLUSTER corresponds to the Tectonic $CLUSTER variable, which gets used as the basename for the AWS auto-scaling groups, (i.e. "$CLUSTER-master" and "$CLUSTER-worker")
 
-* On Azure
+### Example:  Post-processing for an Azure Tectonic cluster, to be ready for Portworx to deploy
 
 To take a cluster that has been successfully deployed through Tectonic, 
 and then add 2 100GB disks to each worker node, running:
