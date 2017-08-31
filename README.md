@@ -127,17 +127,22 @@ where $AWS_CLUSTER corresponds to the Tectonic $CLUSTER variable, which gets use
 * On Azure
 
 To take a cluster that has been successfully deployed through Tectonic, 
-and then add 2 100GB disks to each worker node:
+and then add 2 100GB disks to each worker node, running:
 
 ```
 docker run px-ptool ./px_provision.sh pxify azure --arm_client_id $ARM_CLIENT_ID             \
->                               --arm_subscription_id $ARM_SUBSCRIPTION_ID \
->                               --arm_client_secret $ARM_CLIENT_SECRET     \
->                               --arm_tenant_id $ARM_TENANT_ID             \
->                               --region $ARM_REGION                       \
->                               --arm_cluster $CLUSTER                     \
->                               --disks 2                                  \
->                               --disk_size 100
+                               --arm_subscription_id $ARM_SUBSCRIPTION_ID \
+                               --arm_client_secret $ARM_CLIENT_SECRET     \
+                               --arm_tenant_id $ARM_TENANT_ID             \
+                               --region $ARM_REGION                       \
+                               --arm_cluster $CLUSTER                     \
+                               --disks 2                                  \
+                               --disk_size 100
+```
+
+should produce output similar to :
+
+```
 VMs for jefftonic2-worker =
     vm :  jefftonic2-worker-0
     vm :  jefftonic2-worker-1
