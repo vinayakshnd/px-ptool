@@ -130,12 +130,29 @@ To take a cluster that has been successfully deployed through Tectonic,
 and then add 2 100GB disks to each worker node:
 
 ```
-./px_provision.sh pxify azure --arm_client_id $ARM_CLIENT_ID             \
-                              --arm_subscription_id $ARM_SUBSCRIPTION_ID \
-                              --arm_client_secret $ARM_CLIENT_SECRET     \
-                              --arm_tenant_id $ARM_TENANT_ID             \
-                              --region $ARM_REGION                       \
-                              --arm_cluster $CLUSTER                     \
-                              --disks 2                                  \
-                              --disk_size 100
+docker run px-ptool ./px_provision.sh pxify azure --arm_client_id $ARM_CLIENT_ID             \
+>                               --arm_subscription_id $ARM_SUBSCRIPTION_ID \
+>                               --arm_client_secret $ARM_CLIENT_SECRET     \
+>                               --arm_tenant_id $ARM_TENANT_ID             \
+>                               --region $ARM_REGION                       \
+>                               --arm_cluster $CLUSTER                     \
+>                               --disks 2                                  \
+>                               --disk_size 100
+VMs for jefftonic2-worker =
+    vm :  jefftonic2-worker-0
+    vm :  jefftonic2-worker-1
+    vm :  jefftonic2-worker-2
+VMs for jefftonic2-master =
+    vm :  jefftonic2-master-0
+ID: /subscriptions/72c299a4-a431-4b8e-80ef-6855109979d9/resourceGroups/tectonic-cluster-jefftonic2/providers/Microsoft.Storage/storageAccounts/worker9e1cbfb6, Name: worker9e1cbfb6, Kind: Storage
+     Attach Data Disk : jefftonic2-worker-0  2 , size = 100
+     Attach Data Disk : jefftonic2-worker-1  2 , size = 100
+     Attach Data Disk : jefftonic2-worker-2  2 , size = 100
+Adding security rule with port :  9001 pxport-9001
+Adding security rule with port :  9002 pxport-9002
+Adding security rule with port :  9003 pxport-9003
+Adding security rule with port :  9010 pxport-9010
+Adding security rule with port :  9012 pxport-9012
+Adding security rule with port :  9014 pxport-9014
+Adding LH security rule with port :  30062 px-port-LH
 ```
