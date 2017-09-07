@@ -20,7 +20,7 @@ This container can be used for following:
 
 ## Usage
 
-`docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:1.4 <SUB COMMAND>`
+`docker run -v ${PWD}/output:/root/px_prov/output portworx/px_prov:1.4 <SUB COMMAND>`
 
 ### Sub Command Explanation:
 
@@ -57,7 +57,7 @@ Pxify takes an existing Tectonic cluster deployed on AWS, and makes it ready for
 ### Example : To create VMs and Disks on azure
 
 ~~~
-docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:1.4 ./px_provision.sh apply azure \
+docker run -v ${PWD}/output:/root/px_prov/output portworx/px_prov:1.4 ./px_provision.sh apply azure \
 --vm_creds 'nodeadm|s3cretP@ss' \
 --region 'West Europe' \
 --image 'Canonical|UbuntuServer|14.04.2-LTS|latest' \
@@ -71,7 +71,7 @@ docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:1.4 ./px_pro
 ### Example : To create VMs and Disks on GCP
 
 ~~~
-docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:1.3 ./px_provision.sh apply gcp \
+docker run -v ${PWD}/output:/root/px_prov/output portworx/px_prov:1.3 ./px_provision.sh apply gcp \
 --region 'us-central1|us-central1-a' \
 --image 'ubuntu-os-cloud/ubuntu-1604-xenial-v20170330' \
 --size 'n1-standard-1' \
@@ -84,7 +84,7 @@ docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:1.3 ./px_pro
 ### Example : To create VMs and Disks on DigitalOcean
 
 ~~~
-docker run -v ${PWD}/output:/root/px_prov/output infracloud/px_prov:1.3 ./px_provision.sh apply digitalocean \
+docker run -v ${PWD}/output:/root/px_prov/output portworx/px_prov:1.3 ./px_provision.sh apply digitalocean \
 --region 'sfo2' \
 --image 'centos-7-x64' \
 --size '2gb' \
