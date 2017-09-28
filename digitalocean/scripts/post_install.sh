@@ -44,6 +44,9 @@ else
 # Install docker
     curl -fsSL https://get.docker.com/ | sudo sh
 
+#
+# Create symlink to docker binary
+    ln -s /usr/bin/docker /bin/docker 
 fi
 
 

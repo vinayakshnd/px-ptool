@@ -56,7 +56,7 @@ def do_output_json(drop_objs, user_prefix, inst_px):
                                 "DockerDisk": docker_disk,
                                 "Disks": other_disks}
                 json_out.append(drop_details)
-                if inst_px is True:
+                if inst_px:
                     px_installed, px_msg = install_px(public_ip, adm_user, adm_pass)
                     if px_installed:
                         print "INFO : Portworx installed successfully on {}".format(public_ip)
