@@ -37,6 +37,12 @@ if [[ "${OS_NAME}" == "coreos" ]]; then
     echo "Defaults:${MYUSER} " '!requiretty' | sudo tee -a /etc/sudoers.d/${MYUSER}
     #
     # CoreOS ships with latest compatible docker so no need to mess around.
+
+    #
+    # Remove -selinux-enabled flag from docker-daemon
+    sudo sed -i 's/Environment=DOCKER_SELINUX=--selinux-enabled=true/#Environment=DOCKER_SELINUX=--selinux-enabled=true/g'  /run/systemd/system/docker.service
+    sudo systemctl daemon-reload 
+
 else
     echo "Defaults:${MYUSER} " '!requiretty' >> /etc/sudoers
     echo "${MYUSER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
@@ -44,14 +50,16 @@ else
 # Install docker
     curl -fsSL https://get.docker.com/ | sudo sh
 
-#
-# Create symlink to docker binary
-    ln -s /usr/bin/docker /bin/docker 
+    #
+    # Create symlink to docker binary
+    if [ ! -f /bin/docker ]; then
+        sudo ln -s /usr/bin/docker /bin/docker 
+    fi
 fi
 
 
 if [[ "${OS_NAME}" == "ubuntu" ]]; then
-    sudo mount --make-shared /
+    sudo mount --make-shared /  
 fi
 
 if [[ "${OS_NAME}" == "centos" ]]; then
@@ -67,7 +75,7 @@ NET_INTF=$(ip a | grep ${PUB_IP} | awk '{print $NF}')
 
 if [[ "${OS_NAME}" == "coreos" ]]; then
 cat<<EOF >/tmp/install_px.sh
-sudo docker run --restart=always --name px -d --net=host     \
+sudo docker run --restart=always --name px-enterprise -d --net=host     \
                  --privileged=true                             \
                  -v /run/docker/plugins:/run/docker/plugins    \
                  -v /var/lib/osd:/var/lib/osd:shared           \
