@@ -52,10 +52,22 @@ fi
 sudo mount --make-shared /
 if [[ "${OS_NAME}" == "ubuntu" ]]; then
     sudo mount --make-shared /mnt
+
+    #
+    #  Install FIO
+    sudo apt install -y fio
 fi
 
 if [[ "${OS_NAME}" == "centos" ]]; then
     sudo service docker start
+
+    #
+    #  Install FIO
+    sudo yum -y install wget                                         
+    sudo wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-10.noarch.rpm
+    sudo rpm -Uvh --replacepkgs epel-release-7-10.noarch.rpm           
+    sudo yum -y install fio 
+   
 fi
 
 # Install PX enterprise
