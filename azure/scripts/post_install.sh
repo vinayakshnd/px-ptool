@@ -32,19 +32,42 @@ NET_INTF=$(ip a | grep ${PRIV_IP} | awk '{print $NF}')
 
 #
 # CoreOS ships with latest compatible docker so no need to mess around.
-if [[ "${OS_NAME}" != "coreos" ]]; then
-#
-# Install Docker directly
-curl -fsSL https://get.docker.com/ | sudo sh
+if [[ "${OS_NAME}" == "coreos" ]]; then
+    #
+    # Remove -selinux-enabled flag from docker-daemon
+    sudo sed -i 's/Environment=DOCKER_SELINUX=--selinux-enabled=true/#Environment=DOCKER_SELINUX=--selinux-enabled=true/g'  /run/systemd/system/docker.service
+    sudo systemctl daemon-reload 
+else
+    #
+    # Install Docker directly
+    curl -fsSL https://get.docker.com/ | sudo sh
+
+    #
+    # Create symlink to docker binary
+    if [ ! -f /bin/docker ]; then
+        sudo ln -s /usr/bin/docker /bin/docker 
+    fi
 fi
 
 sudo mount --make-shared /
 if [[ "${OS_NAME}" == "ubuntu" ]]; then
     sudo mount --make-shared /mnt
+
+    #
+    #  Install FIO
+    sudo apt install -y fio
 fi
 
 if [[ "${OS_NAME}" == "centos" ]]; then
     sudo service docker start
+
+    #
+    #  Install FIO
+    sudo yum -y install wget                                         
+    sudo wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-10.noarch.rpm
+    sudo rpm -Uvh --replacepkgs epel-release-7-10.noarch.rpm           
+    sudo yum -y install fio 
+   
 fi
 
 # Install PX enterprise
@@ -52,7 +75,7 @@ fi
 
 if [[ "${OS_NAME}" == "coreos" ]]; then
 cat<<EOF >/tmp/install_px.sh
-sudo docker run --restart=always --name px -d --net=host     \
+sudo docker run --restart=always --name px-enterprise -d --net=host     \
                  --privileged=true                             \
                  -v /run/docker/plugins:/run/docker/plugins    \
                  -v /var/lib/osd:/var/lib/osd:shared           \
