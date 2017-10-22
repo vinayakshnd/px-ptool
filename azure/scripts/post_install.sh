@@ -59,6 +59,7 @@ if [[ "${OS_NAME}" == "ubuntu" ]]; then
 fi
 
 if [[ "${OS_NAME}" == "centos" ]]; then
+    sudo systemctl enable docker
     sudo service docker start
 
     #
@@ -85,6 +86,7 @@ sudo docker run --restart=always --name px-enterprise -d --net=host     \
                  -v /var/run/docker.sock:/var/run/docker.sock  \
                  -v /var/cores:/var/cores                      \
                  -v /lib/modules:/lib/modules                  \
+                 -v /mnt:/mnt:shared                           \
                 ${PX_IMAGE} -daemon \
                 -c ${MY_UUID} -k etcd://etcd-us-east-1b.portworx.com:4001,etcd://etcd-us-east-1c.portworx.com:4001,etcd://etcd-us-east-1d.portworx.com:4001 \
                 -a -m ${NET_INTF} -d ${NET_INTF}

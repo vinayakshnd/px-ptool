@@ -6,6 +6,7 @@ import shutil
 from jinja2 import Template
 from do_functions import do_api_action
 from azure_functions import gen_azure_json
+from aws_functions import gen_aws_json
 
 
 def get_args():
@@ -16,7 +17,7 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('action', choices=['apply', 'destroy', 'reset'], action='store',
                         help='Action to be taken on cloud')
-    parser.add_argument('cloud', choices=['digitalocean', 'gcp', 'azure'], action='store',
+    parser.add_argument('cloud', choices=['digitalocean', 'gcp', 'azure', 'aws'], action='store',
                         help='The cloud on which to perform action')
     parser.add_argument('--vm_creds', action='store',
                         help='Username and password for the VMs separated by |')
@@ -43,7 +44,9 @@ def get_args():
     parser.add_argument('--install_px', default=True, action='store',
                         help="Install Portworx or not. True/False")
     parser.add_argument('--docker_image', action='store',
-                        help="Docker image tag for portworx")
+                        help="Docker image tag for portworx"),
+    parser.add_argument('--setup_ecs', default=False, action='store',
+                        help="Setup ECS cluster on AWS (Applicable wich ECS AMI). true/false")
     myargs = parser.parse_args()
     return myargs
 
@@ -67,6 +70,13 @@ def gen_tfvars(myargs):
                 gcp_region, gcp_region_zone = myargs.region.split('|')
                 f.write('px_region = "{}"\n'.format(gcp_region))
                 f.write('px_region_zone = "{}"\n'.format(gcp_region_zone))
+            if myargs.cloud == 'aws':
+                aws_region, aws_availability_zone = myargs.region.split('|')
+                f.write('aws_region = "{}"\n'.format(aws_region))
+                f.write('availability_zone = "{}"\n'.format(aws_availability_zone))
+                if myargs.setup_ecs:
+                    f.write('setup_ecs = 1\n')
+                    f.write('default_user = "ec2-user"\n')
             else:
                 f.write('px_region = "{}"\n'.format(myargs.region))
 
@@ -126,6 +136,10 @@ def gen_creds(myargs):
             credfile.write('azure_client_id = "{}"\n'.format(os.getenv('TF_VAR_azure_client_id')))
             credfile.write('azure_client_secret = "{}"\n'.format(os.getenv('TF_VAR_azure_client_secret')))
             credfile.write('azure_tenant_id = "{}"\n'.format(os.getenv('TF_VAR_azure_tenant_id')))
+        if myargs.cloud == 'aws':
+            credfile.write('aws_access_key = "{}"\n'.format(os.getenv('TF_VAR_aws_access_key')))
+            credfile.write('aws_secret_key = "{}"\n'.format(os.getenv('TF_VAR_aws_secret_key')))
+            credfile.write('px_key_name = "{}"\n'.format(os.getenv('TF_VAR_aws_key')))
 
 
 def gen_extra_disks(mycloud, dlist):
@@ -187,7 +201,26 @@ resource "google_compute_disk" "gcp-xdisk{{ idx }}-pd" {
         az_inst = az_inst.replace('/*DO_NO_REMOVE_THIS_COMMENT*/', az_disks)
         with open('azure/instances.tf', mode='w') as azfile:
             azfile.write(az_inst)
+    if mycloud == 'aws':
+        aws_disk_tpl = Template("""
+        resource "aws_ebs_volume" "px-xdisk{{ idx }}-vol" {
+          count = "${var.px_node_count}"
+          availability_zone  = "${var.availability_zone}"
+          size        = "{{ disk_size }}"
+        }
 
+        resource "aws_volume_attachment" "xdisk{{ idx }}_vol_attach" {
+            device_name = "/dev/sdd"
+            count = "${var.px_node_count}"
+            volume_id   = "${element(aws_ebs_volume.px_xdisk{{ idx }}_vol.*.id, count.index)}"
+            instance_id = "${element(aws_instance.px-node.*.id, count.index)}"
+        }    
+        """)
+        with open('aws/extra_disks.tf', 'w') as xtradisk:
+            for d in dlist:
+                if d != '':
+                    xtradisk.write(aws_disk_tpl.render(disk_size=d, idx=mycount))
+                    mycount += 1
 
 def tf_apply(mycloud, myprefix, install_px):
     """
@@ -208,6 +241,8 @@ def tf_apply(mycloud, myprefix, install_px):
         do_api_action('attach', myprefix, install_px)
     if mycloud == 'azure':
         gen_azure_json(myprefix, install_px)
+    if mycloud == 'aws':
+        gen_aws_json(myprefix, install_px)
 
 
 def tf_destroy(mycloud, myprefix):
