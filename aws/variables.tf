@@ -46,7 +46,7 @@ variable "default_user" {
 
 variable "private_key_file" {
   description = "Location of the private key file"
-  default = "/root/.ssh/id_rsa_px"
+  default = "/root/.ssh/id_rsa"
 }
 
 variable "user_prefix" {

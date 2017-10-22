@@ -38,8 +38,12 @@ if [ ! -f /bin/docker ]; then
         sudo ln -s /usr/bin/docker /bin/docker 
 fi
 
+sudo mount --make-shared / 
+
 #if [[ "${OS_NAME}" == "centos" ]]; then
-#    sudo service docker start
+#    
+    sudo systemctl enable docker
+    sudo service docker start
 
     #
     #  Install FIO
@@ -62,7 +66,7 @@ sudo service docker restart
 NET_INTF=$(ip a | grep ${PUB_IP} | awk '{print $NF}')
 
 cat<<EOF >/tmp/install_px.sh
-docker run --restart=always --name px-enterprise -d --net=host \
+[ ! "$(docker ps | grep px-enterprise)" ] && docker run --restart=always --name px-enterprise -d --net=host \
                --privileged=true                             \
                -v /run/docker/plugins:/run/docker/plugins    \
                -v /var/lib/osd:/var/lib/osd:shared           \
@@ -72,6 +76,7 @@ docker run --restart=always --name px-enterprise -d --net=host \
                -v /var/run/docker.sock:/var/run/docker.sock  \
                -v /var/cores:/var/cores                      \
                -v /usr/src:/usr/src                          \
+               -v /mnt:/mnt:shared                           \
                ${PX_DOCKER_IMAGE} -daemon -k etcd://etcd-us-east-1b.portworx.com:4001,etcd://etcd-us-east-1c.portworx.com:4001,etcd://etcd-us-east-1d.portworx.com:4001 \
                -a -m ${NET_INTF} -d ${NET_INTF} -c ${MY_UUID}
 EOF
