@@ -75,7 +75,7 @@ def gen_tfvars(myargs):
                 f.write('aws_region = "{}"\n'.format(aws_region))
                 f.write('availability_zone = "{}"\n'.format(aws_availability_zone))
                 if myargs.setup_ecs:
-                    f.write('setup_ecs = 1\n')
+                    f.write('setup_ecs = true\n')
                     f.write('default_user = "ec2-user"\n')
             else:
                 f.write('px_region = "{}"\n'.format(myargs.region))

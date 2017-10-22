@@ -30,7 +30,7 @@ echo "Defaults:${MY_USER}" '!requiretty' | sudo tee -a /etc/sudoers
 
 #
 # Install Docker directly
-curl -fsSL https://get.docker.com/ | sudo sh
+docker -v || curl -fsSL https://get.docker.com/ | sudo sh
 
 #
 # Create symlink to docker binary
@@ -42,7 +42,7 @@ sudo mount --make-shared /
 
 #if [[ "${OS_NAME}" == "centos" ]]; then
 #    
-    sudo systemctl enable docker
+    sudo systemctl enable docker || true
     sudo service docker start
 
     #
@@ -59,7 +59,7 @@ sudo mount --make-shared /
 #sudo sed -i.bak -e \
 #        's:^\(\ \+\)"$unshare" -m -- nohup:\1"$unshare" -m --propagation shared -- nohup:' \
 #         /etc/init.d/docker
-sudo service docker restart
+#sudo service docker restart
 
 #
 # Find interface which binds to external IP
