@@ -3,8 +3,8 @@ resource "azurerm_storage_account" "astgacc" {
   name                = "stgacc${var.user_prefix}"
   resource_group_name = "${azurerm_resource_group.rg.name}"
   location            = "${var.px_region}"
-  account_type        = "Standard_LRS"
-
+  account_replication_type = "LRS"
+  account_tier        = "Standard"
   tags {
     environment = "${var.user_prefix}"
   }

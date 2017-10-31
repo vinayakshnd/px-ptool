@@ -5,6 +5,7 @@ MY_UUID=$1;
 MY_PASSWD=$2;
 PX_IMAGE=$3;
 OS_NAME=$(grep "^ID=" /etc/os-release | cut -d"=" -f2 | tr -cd '[:alnum:]')
+OS_VERSION=$(grep "^VERSION_ID=" /etc/os-release | cut -d"=" -f2 | tr -cd '[:alnum:]')
 
 # Below is a dirty little hack to allow passwordless sudo using password
 cat <<EOF > /tmp/deleteme.sh
@@ -50,6 +51,15 @@ else
 fi
 
 sudo mount --make-shared /
+
+#
+# Enable Docker daemon service to start on reboot. For upstart(Ubuntu14.04) init system, Docker is already enabled.
+if [[ "${OS_NAME}" == "centos" || "${OS_NAME}" == "ubuntu" && "${OS_VERSION}" != "1404" ]]; then 
+    sudo systemctl enable docker
+    sudo systemctl daemon-reload
+    sudo systemctl restart docker
+fi
+
 if [[ "${OS_NAME}" == "ubuntu" ]]; then
     sudo mount --make-shared /mnt
 
@@ -59,16 +69,11 @@ if [[ "${OS_NAME}" == "ubuntu" ]]; then
 fi
 
 if [[ "${OS_NAME}" == "centos" ]]; then
-    sudo systemctl enable docker
-    sudo service docker start
 
     #
     #  Install FIO
-    sudo yum -y install wget                                         
-    sudo wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-10.noarch.rpm
-    sudo rpm -Uvh --replacepkgs epel-release-7-10.noarch.rpm           
-    sudo yum -y install fio 
-   
+    sudo yum -y install epel-release          
+    sudo yum -y install fio
 fi
 
 # Install PX enterprise

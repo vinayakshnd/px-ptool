@@ -9,6 +9,8 @@ PX_IMAGE=$4;
 # Generate UUID using cat /proc/sys/kernel/random/uuid
 
 OS_NAME=$(grep "^ID=" /etc/os-release | cut -d"=" -f2 | tr -cd '[:alnum:]')
+OS_VERSION=$(grep "^VERSION_ID=" /etc/os-release | cut -d"=" -f2 | tr -cd '[:alnum:]')
+
 if [[ "${OS_NAME}" == "ubuntu" ]]; then
    SSH_SVC=ssh
    mkdir -p /home/${MYUSER};
@@ -66,16 +68,20 @@ if [[ "${OS_NAME}" == "ubuntu" ]]; then
     sudo apt install -y fio
 fi
 
-if [[ "${OS_NAME}" == "centos" ]]; then
+#
+# Enable Docker daemon service to start on reboot. For upstart(Ubuntu14.04) init system, Docker is already enabled.
+if [[ "${OS_NAME}" == "centos" || "${OS_NAME}" == "ubuntu" && "${OS_VERSION}" != "1404" ]]; then 
     sudo systemctl enable docker
-    sudo service docker start
+    sudo systemctl daemon-reload
+    sudo systemctl restart docker
+fi
+
+if [[ "${OS_NAME}" == "centos" ]]; then
 
     #
     #  Install FIO
-    sudo yum -y install wget                                         
-    sudo wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-10.noarch.rpm
-    sudo rpm -Uvh --replacepkgs epel-release-7-10.noarch.rpm           
-    sudo yum -y install fio  
+    sudo yum -y install epel-release          
+    sudo yum -y install fio
 fi
 
 #

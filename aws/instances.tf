@@ -6,7 +6,7 @@ provider "aws" {
 
 resource "aws_instance" "px-node" {
   ami = "${var.px_image}"
-  count = "${var.px_node_count}"
+  count = "${var.setup_ecs ? 0 : var.px_node_count}"
   instance_type = "${var.px_vm_size}"
   key_name = "${var.px_key_name}"
   availability_zone = "${var.availability_zone}"
@@ -16,7 +16,7 @@ resource "aws_instance" "px-node" {
 }
 
 resource "null_resource" "post_install" {
-  count = "${var.px_node_count}"
+  count = "${var.setup_ecs ? 0 : var.px_node_count}"
 
   provisioner "local-exec" {
       command = "sleep 180"
