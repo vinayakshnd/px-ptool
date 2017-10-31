@@ -43,7 +43,7 @@ resource "aws_volume_attachment" "swap_vol_attach" {
 }
 
 resource "aws_volume_attachment" "docker_vol_attach" {
-  device_name = "/dev/sdc"
+  device_name = "/dev/sdg"
   count = "${var.setup_ecs ? 0 :var.px_node_count}"
   volume_id   = "${element(aws_ebs_volume.px_docker_vol.*.id, count.index)}"
   instance_id = "${element(aws_instance.px-node.*.id, count.index)}"
@@ -75,7 +75,7 @@ resource "aws_volume_attachment" "swap_ecs_vol_attach" {
 }
 
 resource "aws_volume_attachment" "docker_ecs_vol_attach" {
-  device_name = "/dev/sdc"
+  device_name = "/dev/sdg"
   count = "${var.setup_ecs ? var.px_node_count :0}"
   volume_id   = "${element(aws_ebs_volume.px_docker_vol.*.id, count.index)}"
   instance_id = "${element(aws_instance.px-ecs-node.*.id, count.index)}"

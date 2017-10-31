@@ -46,7 +46,9 @@ def get_args():
     parser.add_argument('--docker_image', action='store',
                         help="Docker image tag for portworx"),
     parser.add_argument('--setup_ecs', default=False, action='store',
-                        help="Setup ECS cluster on AWS (Applicable wich ECS AMI). true/false")
+                        help="Setup ECS cluster on AWS (Applicable for ECS AMI on AWS cloud). true/false")
+    parser.add_argument('--default_user', action='store',
+                        help="Default user created in AWS AMI for login (Applicable for AWS cloud). true/false")
     myargs = parser.parse_args()
     return myargs
 
@@ -74,7 +76,7 @@ def gen_tfvars(myargs):
                 aws_region, aws_availability_zone = myargs.region.split('|')
                 f.write('aws_region = "{}"\n'.format(aws_region))
                 f.write('availability_zone = "{}"\n'.format(aws_availability_zone))
-                if myargs.setup_ecs:
+                if myargs.setup_ecs is True:
                     f.write('setup_ecs = true\n')
                     f.write('default_user = "ec2-user"\n')
             else:
@@ -118,6 +120,10 @@ def gen_tfvars(myargs):
         f.write('px_ent_uuid = "{}"\n'.format(px_ent_uuid))
         if myargs.docker_image is not None:
             f.write('docker_image = "{}"'.format(myargs.docker_image))
+
+        # Populate default user if passed
+        if myargs.default_user is not None:
+            f.write('default_user = "{}"'.format(myargs.default_user))
 
 
 def gen_creds(myargs):
@@ -248,6 +254,7 @@ def tf_apply(mycloud, myprefix, install_px):
 def tf_destroy(mycloud, myprefix):
     if mycloud == 'digitalocean':
         do_api_action('detach', myprefix, False)
+    # Output folder location is driven by Jenkins Multi-configuration job
     tf_cmd = 'terraform destroy -no-color -force ' \
              '-var-file creds.tfvars ' \
              '-var-file {}/output/{}_{}_terraform.tfvars ' \

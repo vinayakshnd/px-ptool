@@ -26,7 +26,7 @@ def gen_aws_json(user_prefix, inst_px):
     json_out = []
     count = 0
     for public_ip in pub_ip_list:
-        docker_disk = '/dev/xvdc'
+        docker_disk = '/dev/xvdg'
         other_disks = []
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -34,7 +34,7 @@ def gen_aws_json(user_prefix, inst_px):
         stdin, stdout, stderr = ssh.exec_command("lsblk")
         outlist = stdout.readlines()
         for l in outlist:
-             if l.endswith('disk \n') and l.split()[0] not in ['xvda', 'xvdcz', 'xvdc']:
+             if l.endswith('disk \n') and l.split()[0] not in ['xvda', 'xvdcz', 'xvdg']:
                 other_disks.append("/dev/{}".format(l.split()[0]))
         instance_details = {"User": admuser,
                         "Passwd": admpass,
