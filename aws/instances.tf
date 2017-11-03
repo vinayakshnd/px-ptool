@@ -27,7 +27,7 @@ resource "null_resource" "post_install" {
   }
 
   provisioner "local-exec" {
-      command = "ssh -i ${var.private_key_file} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${var.default_user}@${element(aws_instance.px-node.*.public_ip, count.index)} 'sudo chmod +x /tmp/post_install.sh;sudo /tmp/post_install.sh ${var.vm_admin_user} ${var.vm_admin_password} ${var.px_ent_uuid} ${var.docker_image} ${element(aws_instance.px-node.*.private_ip, count.index)} ${var.docker_image}'"
+      command = "ssh -t -i ${var.private_key_file} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${var.default_user}@${element(aws_instance.px-node.*.public_ip, count.index)} 'sudo chmod +x /tmp/post_install.sh;sudo /tmp/post_install.sh ${var.vm_admin_user} ${var.vm_admin_password} ${var.px_ent_uuid} ${var.docker_image} ${element(aws_instance.px-node.*.private_ip, count.index)} ${var.docker_image}'"
   }
 }
 
